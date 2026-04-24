@@ -20,6 +20,19 @@ logger = logging.getLogger(__name__)
 
 IST = timezone(timedelta(hours=5, minutes=30))
 
+# Indicators with categorical (non-numeric) values — skip float conversion
+CATEGORICAL_INDICATORS = {"gift_nifty_signal"}
+
+
+def _safe_float(value, default=None):
+    """Safely coerce a value to float, returning default if not possible."""
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return default
+
 # Indicators to track in the changelog (key: display_name)
 TRACKED_INDICATORS = {
     "nifty_pe": "Nifty P/E",
@@ -176,12 +189,13 @@ def generate_changelog(
         for key, display_name in TRACKED_INDICATORS.items():
             pv = previous.get(key)
             cv = current.get(key)
-            try:
-                if pv is not None and cv is not None and abs(float(cv) - float(pv)) > 0.01:
-                    driver_lines.append(f"- {display_name}: {float(pv):.2f} → {float(cv):.2f}")
-            except (ValueError, TypeError):
+            if key in CATEGORICAL_INDICATORS:
                 if pv is not None and cv is not None and str(pv) != str(cv):
                     driver_lines.append(f"- {display_name}: {pv} → {cv}")
+            else:
+                pv_f, cv_f = _safe_float(pv), _safe_float(cv)
+                if pv_f is not None and cv_f is not None and abs(cv_f - pv_f) > 0.01:
+                    driver_lines.append(f"- {display_name}: {pv_f:.2f} → {cv_f:.2f}")
 
         if driver_lines:
             alert_section += "\n".join(driver_lines[:5]) + "\n"
@@ -211,19 +225,19 @@ According to NTI's model, this zone suggests """
         cv = current.get(key)
         if pv is not None or cv is not None:
             unit = _get_unit(key)
-            try:
-                change_str = _format_change(
-                    float(pv) if pv is not None else None,
-                    float(cv) if cv is not None else None,
-                    unit,
-                )
-            except (ValueError, TypeError):
+            if key in CATEGORICAL_INDICATORS:
+                # Categorical indicators — string comparison only
                 if pv is None or cv is None:
-                    change_str = f"→ {cv}{unit}" if cv is not None else "— (no data)"
+                    change_str = f"→ {cv}" if cv is not None else "— (no data)"
                 elif str(pv) == str(cv):
-                    change_str = f"→ {cv}{unit} (no change)"
+                    change_str = f"→ {cv} (no change)"
                 else:
-                    change_str = f"→ {cv}{unit} (was {pv})"
+                    change_str = f"→ {cv} (was {pv})"
+            else:
+                # Numeric indicators — float comparison with safe conversion
+                pv_f = _safe_float(pv)
+                cv_f = _safe_float(cv)
+                change_str = _format_change(pv_f, cv_f, unit)
             indicator_changes.append(f"| {display_name} | {pv if pv is not None else '—'} | {cv if cv is not None else '—'} | {change_str} |")
 
     if indicator_changes:
