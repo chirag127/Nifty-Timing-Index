@@ -60,7 +60,9 @@ def compute_composite_scores(stocks: list[dict]) -> list[dict]:
     # --- Quality Score (30% weight) ---
     # Higher ROE = better quality → higher score
     # Lower Debt/Equity = better quality → higher score
-    df["roe_rank"] = df["roe_pct"].rank(ascending=False, method="min", na_option="bottom")
+    # Support both 'roe' (from fundamentals) and 'roe_pct' keys
+    roe_col = "roe_pct" if "roe_pct" in df.columns else "roe"
+    df["roe_rank"] = df[roe_col].rank(ascending=False, method="min", na_option="bottom")
     df["de_rank"] = df["debt_equity"].rank(ascending=True, method="min", na_option="bottom")
 
     if n > 1:
