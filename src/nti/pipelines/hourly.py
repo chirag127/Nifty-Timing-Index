@@ -184,13 +184,14 @@ def run_hourly_pipeline(dry_run: bool = False) -> dict:
     ad_ratio = raw_indicators.get("advance_decline_ratio")
     hl_ratio = raw_indicators.get("high_low_ratio")
 
-    custom_fg = compute_custom_fg_composite(vix_norm, pcr_norm, ad_ratio, hl_ratio)
+    custom_fg = compute_custom_fg_composite(None, vix_norm, pcr_norm, ad_ratio, hl_ratio)
     if custom_fg is not None:
         raw_indicators["custom_fg_composite"] = custom_fg
         normalized["custom_fg_composite"] = custom_fg
 
     # Global overnight composite
     global_overnight = compute_global_overnight_composite(
+        None,
         raw_indicators.get("dow_jones_change"),
         raw_indicators.get("nasdaq_change"),
         raw_indicators.get("nikkei_change"),

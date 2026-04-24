@@ -1,0 +1,11 @@
+{
+  "screened_at": null,
+  "run_type": "post_market",
+  "nti_score_at_screen": null,
+  "universe_size": 0,
+  "passing_filters": 0,
+  "top_picks": [],
+  "sector_summary": {},
+  "exclusion_summary": {},
+  "psu_stocks_count": 0
+}

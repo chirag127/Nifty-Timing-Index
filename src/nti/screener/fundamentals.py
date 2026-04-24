@@ -16,6 +16,20 @@ from nti.config.settings import settings
 
 logger = logging.getLogger(__name__)
 
+
+def _safe_float(value: Any, default: float | None = None) -> float | None:
+    """Safely coerce a value to float, returning default if not possible.
+
+    yfinance sometimes returns strings or unexpected types for numeric fields.
+    This ensures all numeric fields are properly typed before filtering.
+    """
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return default
+
 BATCH_SIZE = 50
 BATCH_DELAY = 2.0  # seconds between batches
 
@@ -36,18 +50,18 @@ def fetch_stock_fundamentals(symbol: str) -> dict[str, Any]:
         ticker = yf.Ticker(yf_symbol)
         info = ticker.info
 
-        market_cap = info.get("marketCap", 0) or 0
+        market_cap = _safe_float(info.get("marketCap"), 0) or 0
         market_cap_cr = market_cap / 1e7 if market_cap else 0  # Convert to Crores
 
         return {
             "symbol": symbol,
-            "pe": info.get("trailingPE"),
-            "pb": info.get("priceToBook"),
+            "pe": _safe_float(info.get("trailingPE")),
+            "pb": _safe_float(info.get("priceToBook")),
             "market_cap_cr": round(market_cap_cr, 1),
-            "dividend_yield": (info.get("dividendYield", 0) or 0) * 100,
-            "roe": (info.get("returnOnEquity", 0) or 0) * 100,
-            "debt_equity": info.get("debtToEquity"),
-            "current_price": info.get("currentPrice"),
+            "dividend_yield": (_safe_float(info.get("dividendYield"), 0) or 0) * 100,
+            "roe": (_safe_float(info.get("returnOnEquity"), 0) or 0) * 100,
+            "debt_equity": _safe_float(info.get("debtToEquity")),
+            "current_price": _safe_float(info.get("currentPrice")),
             "sector": info.get("sector", ""),
             "industry": info.get("industry", ""),
         }

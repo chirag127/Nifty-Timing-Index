@@ -1,0 +1,38 @@
+{
+  "timestamp": "2026-04-24T17:59:13.781426+05:30",
+  "market_status": "closed",
+  "primary_index": "nifty_50",
+  "indices": {
+    "nifty_50": {
+      "score": null,
+      "zone": "UNKNOWN",
+      "confidence": 0
+    },
+    "nifty_bank": {
+      "score": null,
+      "zone": "UNKNOWN",
+      "confidence": 0
+    },
+    "sensex": {
+      "score": null,
+      "zone": "UNKNOWN",
+      "confidence": 0
+    },
+    "nifty_midcap_150": {
+      "score": null,
+      "zone": "UNKNOWN",
+      "confidence": 0
+    },
+    "nifty_smallcap_250": {
+      "score": null,
+      "zone": "UNKNOWN",
+      "confidence": 0
+    }
+  },
+  "indicators": {},
+  "top_drivers": [],
+  "top_stock_picks": [],
+  "latest_blog_slug": "",
+  "model_version": "none",
+  "model_confidence": 0
+}

@@ -1,0 +1,11 @@
+{
+  "version": "none",
+  "training_samples": 0,
+  "cv_accuracy": 0,
+  "cv_roc_auc": 0,
+  "feature_importance": {},
+  "training_date": null,
+  "retrain_duration_seconds": 0,
+  "status": "cold_start",
+  "message": "Model will be trained after sufficient data accumulates (4\u20138 weeks)"
+}
