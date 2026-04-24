@@ -49,7 +49,7 @@ def run_cmd(
     capture: bool = False,
 ) -> subprocess.CompletedProcess[str]:
     """Run shell command and handle errors."""
-    print(f"  → {cmd}")
+    print(f"  > {cmd}")
     result = subprocess.run(
         cmd,
         shell=True,
@@ -103,6 +103,14 @@ def push_secrets_to_github(env: dict[str, str], repo: str) -> None:
     with open(secrets_file, "w") as f:
         for key, value in env.items():
             if value and not key.startswith("_") and key not in skip_keys:
+                # Create PUBLIC_ prefixed versions for Astro (client-safe keys only)
+                public_safe = {
+                    "FIREBASE_API_KEY", "FIREBASE_AUTH_DOMAIN", "FIREBASE_PROJECT_ID",
+                    "FIREBASE_STORAGE_BUCKET", "FIREBASE_MESSAGING_SENDER_ID",
+                    "FIREBASE_APP_ID", "FIREBASE_MEASUREMENT_ID",
+                }
+                if key in public_safe:
+                    f.write(f"PUBLIC_{key}={value}\n")
                 f.write(f"{key}={value}\n")
                 count += 1
 
@@ -114,7 +122,7 @@ def push_secrets_to_github(env: dict[str, str], repo: str) -> None:
 
 def create_github_repo(env: dict[str, str]) -> str:
     """Create public GitHub repository if it doesn't exist."""
-    repo_name = env.get("GITHUB_REPO_NAME", "nifty-timing-index")
+    repo_name = env.get("GITHUB_REPO_NAME", "Nifty-Timing-Index")
     username = env.get("GITHUB_USERNAME", "chirag127")
     repo = f"{username}/{repo_name}"
 

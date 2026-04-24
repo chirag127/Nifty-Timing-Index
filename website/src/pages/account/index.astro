@@ -21,6 +21,7 @@ import Layout from "../../layouts/Layout.astro";
           <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
           Sign in with Google
         </button>
+        <div id="login-error" class="login-error" style="display:none"></div>
         <p class="auth-note">Your data is stored securely in Firebase Firestore. We only store preferences you explicitly set.</p>
       </div>
 
@@ -51,6 +52,7 @@ import Layout from "../../layouts/Layout.astro";
           <input type="email" id="pref-alert-email" placeholder="your@email.com" />
         </div>
         <button class="save-btn" id="save-prefs-btn">Save Preferences</button>
+        <span class="save-status" id="save-prefs-status"></span>
       </div>
 
       <div class="card">
@@ -73,6 +75,7 @@ import Layout from "../../layouts/Layout.astro";
           <input type="checkbox" id="pref-psu-only" />
         </div>
         <button class="save-btn" id="save-thresholds-btn">Save Thresholds</button>
+        <span class="save-status" id="save-thresholds-status"></span>
       </div>
 
       <div class="card">
@@ -142,6 +145,17 @@ import Layout from "../../layouts/Layout.astro";
     transition: all var(--transition-fast);
   }
   .google-login-btn:hover { box-shadow: var(--shadow-elevated); transform: translateY(-1px); border-color: var(--color-border-active); }
+  .google-login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .login-error {
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: var(--radius-sm);
+    color: var(--color-crimson);
+    font-size: 0.82rem;
+  }
 
   .auth-note { font-size: 0.72rem; color: var(--color-text-muted); margin-top: 1rem; }
 
@@ -157,6 +171,10 @@ import Layout from "../../layouts/Layout.astro";
     background: var(--color-gold);
     display: flex; align-items: center; justify-content: center;
     font-weight: 700; color: var(--color-bg-primary);
+    overflow: hidden;
+  }
+  .user-avatar img {
+    width: 100%; height: 100%; object-fit: cover;
   }
   .user-name { display: block; font-weight: 600; color: var(--color-text-primary); }
   .user-email { display: block; font-size: 0.8rem; color: var(--color-text-muted); }
@@ -221,12 +239,71 @@ import Layout from "../../layouts/Layout.astro";
     transition: all var(--transition-fast);
   }
   .save-btn:hover { background: var(--color-gold-bright); }
+  .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .save-status {
+    margin-left: 0.75rem;
+    font-size: 0.78rem;
+    color: var(--color-emerald);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .save-status.show { opacity: 1; }
 
   .watchlist-section, .alert-history-section { margin-bottom: 2rem; }
   .watchlist-section .card, .alert-history-section .card { padding: 1.5rem; }
   .hint { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.5rem; }
   .hint a { color: var(--color-gold); }
   .empty-hint { color: var(--color-text-muted); font-size: 0.88rem; }
+
+  .watchlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.6rem;
+  }
+  .watchlist-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.85rem;
+    background: var(--color-bg-sunken);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+  }
+  .watchlist-item:hover { border-color: var(--color-border); background: var(--color-bg-elevated); }
+  .watchlist-item a {
+    color: var(--color-gold);
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-decoration: none;
+  }
+  .watchlist-item a:hover { color: var(--color-gold-bright); }
+  .watchlist-remove {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 0.3rem;
+    transition: color var(--transition-fast);
+  }
+  .watchlist-remove:hover { color: var(--color-crimson); }
+
+  .alert-list { display: flex; flex-direction: column; gap: 0.4rem; }
+  .alert-item {
+    padding: 0.6rem 0.85rem;
+    background: var(--color-bg-sunken);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+  }
+  .alert-item .alert-time {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+  }
 
   /* ---- Light Theme ---- */
   [data-theme="light"] .google-login-btn {
@@ -270,37 +347,268 @@ import Layout from "../../layouts/Layout.astro";
 </style>
 
 <script>
-  const loginBtn = document.getElementById("google-login-btn");
-  const loginPrompt = document.getElementById("login-prompt");
-  const userInfo = document.getElementById("user-info");
-  const prefsSection = document.getElementById("preferences-section");
-  const watchlistSection = document.getElementById("watchlist-section");
-  const alertSection = document.getElementById("alert-history-section");
-  const signoutBtn = document.getElementById("signout-btn");
+  import {
+    signInWithGoogle,
+    signOutUser,
+    onAuthChange,
+    getUserPreferences,
+    saveUserPreferences,
+    getUserWatchlist,
+    removeFromWatchlist,
+    getAlertHistory,
+    type UserPreferences,
+    type WatchlistItem,
+    type AlertRecord,
+  } from "../../lib/auth";
 
-  function showAuthenticated(email: string, name: string) {
+  const loginBtn = document.getElementById("google-login-btn") as HTMLButtonElement;
+  const loginPrompt = document.getElementById("login-prompt")!;
+  const loginError = document.getElementById("login-error")!;
+  const userInfo = document.getElementById("user-info")!;
+  const userAvatar = document.getElementById("user-avatar")!;
+  const userName = document.getElementById("user-name")!;
+  const userEmail = document.getElementById("user-email")!;
+  const prefsSection = document.getElementById("preferences-section")!;
+  const watchlistSection = document.getElementById("watchlist-section")!;
+  const watchlistGrid = document.getElementById("watchlist-grid")!;
+  const watchlistEmpty = document.getElementById("watchlist-empty")!;
+  const alertSection = document.getElementById("alert-history-section")!;
+  const alertList = document.getElementById("alert-history-list")!;
+  const signoutBtn = document.getElementById("signout-btn")!;
+  const savePrefsBtn = document.getElementById("save-prefs-btn") as HTMLButtonElement;
+  const saveThresholdsBtn = document.getElementById("save-thresholds-btn") as HTMLButtonElement;
+
+  let currentUid: string | null = null;
+
+  // ── Show authenticated state ────────────────────────────────────────
+  function showAuthenticated(email: string, name: string, photoURL?: string | null) {
     loginPrompt.style.display = "none";
     userInfo.style.display = "flex";
-    document.getElementById("user-name")!.textContent = name;
-    document.getElementById("user-email")!.textContent = email;
+    loginError.style.display = "none";
+    userName.textContent = name;
+    userEmail.textContent = email;
+
+    if (photoURL) {
+      userAvatar.innerHTML = `<img src="${photoURL}" alt="${name}" referrerpolicy="no-referrer" />`;
+    } else {
+      const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+      userAvatar.textContent = initials || "?";
+    }
+
     prefsSection.style.display = "block";
     watchlistSection.style.display = "block";
     alertSection.style.display = "block";
   }
 
-  if (loginBtn) {
-    loginBtn.addEventListener("click", () => {
-      alert("Firebase Auth integration requires Firebase config. Set up Firebase via scripts/setup.py first.");
-    });
+  function showUnauthenticated() {
+    loginPrompt.style.display = "block";
+    userInfo.style.display = "none";
+    prefsSection.style.display = "none";
+    watchlistSection.style.display = "none";
+    alertSection.style.display = "none";
+    currentUid = null;
   }
 
-  if (signoutBtn) {
-    signoutBtn.addEventListener("click", () => {
-      loginPrompt.style.display = "block";
-      userInfo.style.display = "none";
-      prefsSection.style.display = "none";
-      watchlistSection.style.display = "none";
-      alertSection.style.display = "none";
-    });
+  // ── Load user data from Firestore ──────────────────────────────────
+  async function loadUserData(uid: string) {
+    try {
+      const prefs = await getUserPreferences(uid);
+      applyPreferences(prefs);
+    } catch (err) {
+      console.error("Failed to load preferences:", err);
+    }
+
+    try {
+      const items = await getUserWatchlist(uid);
+      renderWatchlist(items);
+    } catch (err) {
+      console.error("Failed to load watchlist:", err);
+    }
+
+    try {
+      const alerts = await getAlertHistory(uid);
+      renderAlertHistory(alerts);
+    } catch (err) {
+      console.error("Failed to load alert history:", err);
+    }
   }
+
+  function applyPreferences(prefs: UserPreferences) {
+    (document.getElementById("pref-zone-alert") as HTMLInputElement).checked = prefs.zoneAlertEnabled;
+    (document.getElementById("pref-big-move-alert") as HTMLInputElement).checked = prefs.bigMoveAlertEnabled;
+    (document.getElementById("pref-alert-email") as HTMLInputElement).value = prefs.alertEmail;
+    (document.getElementById("pref-max-pe") as HTMLInputElement).value = String(prefs.maxPE);
+    (document.getElementById("pref-max-pb") as HTMLInputElement).value = String(prefs.maxPB);
+    (document.getElementById("pref-min-mcap") as HTMLInputElement).value = String(prefs.minMarketCap);
+    (document.getElementById("pref-psu-only") as HTMLInputElement).checked = prefs.psuOnly;
+    (document.getElementById("pref-dark-mode") as HTMLInputElement).checked = prefs.darkMode;
+  }
+
+  function readPreferences(): UserPreferences {
+    return {
+      zoneAlertEnabled: (document.getElementById("pref-zone-alert") as HTMLInputElement).checked,
+      bigMoveAlertEnabled: (document.getElementById("pref-big-move-alert") as HTMLInputElement).checked,
+      alertEmail: (document.getElementById("pref-alert-email") as HTMLInputElement).value,
+      maxPE: Number((document.getElementById("pref-max-pe") as HTMLInputElement).value) || 20,
+      maxPB: Number((document.getElementById("pref-max-pb") as HTMLInputElement).value) || 3,
+      minMarketCap: Number((document.getElementById("pref-min-mcap") as HTMLInputElement).value) || 500,
+      psuOnly: (document.getElementById("pref-psu-only") as HTMLInputElement).checked,
+      darkMode: (document.getElementById("pref-dark-mode") as HTMLInputElement).checked,
+    };
+  }
+
+  function renderWatchlist(items: WatchlistItem[]) {
+    watchlistGrid.innerHTML = "";
+    if (items.length === 0) {
+      watchlistEmpty.style.display = "block";
+      return;
+    }
+    watchlistEmpty.style.display = "none";
+    for (const item of items) {
+      const el = document.createElement("div");
+      el.className = "watchlist-item";
+      const link = document.createElement("a");
+      link.href = `/stocks/${encodeURIComponent(item.symbol)}`;
+      link.textContent = item.symbol;
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "watchlist-remove";
+      removeBtn.dataset.id = item.id ?? "";
+      removeBtn.title = "Remove";
+      removeBtn.textContent = "\u2715";
+      el.appendChild(link);
+      el.appendChild(removeBtn);
+      el.querySelector(".watchlist-remove")!.addEventListener("click", async () => {
+        if (currentUid && item.id) {
+          await removeFromWatchlist(currentUid, item.id);
+          el.remove();
+          if (watchlistGrid.children.length === 0) watchlistEmpty.style.display = "block";
+        }
+      });
+      watchlistGrid.appendChild(el);
+    }
+  }
+
+  function renderAlertHistory(alerts: AlertRecord[]) {
+    alertList.innerHTML = "";
+    if (alerts.length === 0) {
+      alertList.innerHTML = '<p class="empty-hint">No alerts triggered yet.</p>';
+      return;
+    }
+    for (const a of alerts) {
+      const el = document.createElement("div");
+      el.className = "alert-item";
+      const msgDiv = document.createElement("div");
+      msgDiv.textContent = a.message || a.type;
+      const timeDiv = document.createElement("div");
+      timeDiv.className = "alert-time";
+      timeDiv.textContent = a.triggeredAt
+        ? new Date((a.triggeredAt as any).seconds * 1000).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+        : "—";
+      el.appendChild(msgDiv);
+      el.appendChild(timeDiv);
+      alertList.appendChild(el);
+    }
+  }
+
+  async function flashSaveStatus(el: HTMLElement) {
+    el.textContent = "✓ Saved";
+    el.classList.add("show");
+    setTimeout(() => el.classList.remove("show"), 2000);
+  }
+
+  // ── Event handlers ─────────────────────────────────────────────────
+
+  // Google login
+  loginBtn.addEventListener("click", async () => {
+    loginBtn.disabled = true;
+    loginError.style.display = "none";
+    try {
+      const user = await signInWithGoogle();
+      // onAuthChange listener will handle showing authenticated state + loading data
+    } catch (err: any) {
+      console.error("Login failed:", err);
+      // Ignore popup-closed errors
+      if (err?.code !== "auth/popup-closed-by-user") {
+        loginError.textContent = err?.message || "Login failed. Please try again.";
+        loginError.style.display = "block";
+      }
+    } finally {
+      loginBtn.disabled = false;
+    }
+  });
+
+  // Sign out
+  signoutBtn.addEventListener("click", async () => {
+    try {
+      await signOutUser();
+    } catch (err) {
+      console.error("Sign out failed:", err);
+    }
+    showUnauthenticated();
+  });
+
+  // Save alert preferences
+  savePrefsBtn.addEventListener("click", async () => {
+    if (!currentUid) return;
+    savePrefsBtn.disabled = true;
+    try {
+      const prefs = readPreferences();
+      await saveUserPreferences(currentUid, {
+        zoneAlertEnabled: prefs.zoneAlertEnabled,
+        bigMoveAlertEnabled: prefs.bigMoveAlertEnabled,
+        alertEmail: prefs.alertEmail,
+        darkMode: prefs.darkMode,
+      });
+      flashSaveStatus(document.getElementById("save-prefs-status")!);
+    } catch (err) {
+      console.error("Save failed:", err);
+    } finally {
+      savePrefsBtn.disabled = false;
+    }
+  });
+
+  // Save screener thresholds
+  saveThresholdsBtn.addEventListener("click", async () => {
+    if (!currentUid) return;
+    saveThresholdsBtn.disabled = true;
+    try {
+      const prefs = readPreferences();
+      await saveUserPreferences(currentUid, {
+        maxPE: prefs.maxPE,
+        maxPB: prefs.maxPB,
+        minMarketCap: prefs.minMarketCap,
+        psuOnly: prefs.psuOnly,
+      });
+      flashSaveStatus(document.getElementById("save-thresholds-status")!);
+    } catch (err) {
+      console.error("Save failed:", err);
+    } finally {
+      saveThresholdsBtn.disabled = false;
+    }
+  });
+
+  // Dark mode toggle sync
+  document.getElementById("pref-dark-mode")!.addEventListener("change", (e) => {
+    const dark = (e.target as HTMLInputElement).checked;
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    localStorage.setItem("nti-theme", dark ? "dark" : "light");
+  });
+
+  // ── Auth state listener ─────────────────────────────────────────────
+  let lastLoadedUid: string | null = null;
+  onAuthChange((user) => {
+    if (user) {
+      currentUid = user.uid;
+      showAuthenticated(user.email ?? "", user.displayName ?? "User", user.photoURL);
+      // Only load data once per uid change (avoid double-fetch on login click)
+      if (lastLoadedUid !== user.uid) {
+        lastLoadedUid = user.uid;
+        loadUserData(user.uid);
+      }
+    } else {
+      currentUid = null;
+      lastLoadedUid = null;
+      showUnauthenticated();
+    }
+  });
 </script>

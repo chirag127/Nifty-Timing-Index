@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ── Users collection ──────────────────────────────────────────────
+    // Each user has a document at /users/{userId}
+    // Contains: displayName, email, photoURL, preferences, createdAt, updatedAt
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId); // DPDP Act 2023 — right to erasure
+
+      // ── Watchlist subcollection ─────────────────────────────────────
+      match /watchlist/{itemId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow update: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+
+      // ── Alert history subcollection ─────────────────────────────────
+      match /alerts/{alertId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow update: if false; // Alerts are immutable once created
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // ── Public read-only data ─────────────────────────────────────────
+    // Server-side pipelines write here; clients only read
+    match /signals/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /screener/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /indicators/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ── Deny all other access ─────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
