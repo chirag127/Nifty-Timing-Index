@@ -1,97 +1,128 @@
-"""Hourly Pipeline — Orchestrate the full hourly NTI run.
+"""Hourly Pipeline — Orchestrates the full hourly NTI run using modular steps.
 
-Steps:
-1. Scrape all 30 indicators from various sources
-2. Normalize indicators to 0–100 scale
-3. Run ML inference (or rule-based fallback)
-4. Generate changelog (compare vs previous run)
-5. Generate blog post via LangGraph fusion
-6. Write data files (CSV, JSON, blog .md)
-7. Send alerts on zone change
-8. Git commit and push
+The pipeline is split into 4 independent steps, each with its own
+timeout and intermediate state persistence (data/api/step_*.json):
+
+1. SCRAPE  — Scrape all indicators + backfill missing data (~60s)
+2. ANALYZE — Normalize, inference, news analysis, changelog (~30s + LLM)
+3. BLOG    — Generate blog post via LLM fusion workflow (~90s)
+4. PUBLISH — Write CSV/JSON/blog files, alerts, git push (~15s)
+
+If a step times out or fails, the pipeline:
+- Saves whatever data was collected so far
+- Continues with remaining steps where possible
+- Resumes from the last successful step on next run
+
+Each step can also be run independently:
+    uv run python -m nti.pipelines.steps.scrape
+    uv run python -m nti.pipelines.steps.analyze
+    uv run python -m nti.pipelines.steps.blog
+    uv run python -m nti.pipelines.steps.publish
 
 This is the main entry point called by GitHub Actions every hour.
 """
 
 from __future__ import annotations
 
-import json
 import logging
 import time
 from datetime import datetime, timezone, timedelta
-from pathlib import Path
 
-from nti.config.settings import settings
 from nti.config.thresholds import get_zone
 from nti.config.holidays import is_market_holiday
 
-# Scrapers
-from nti.scrapers.nse_indices import scrape_nse_index_data
-from nti.scrapers.yahoo_finance import scrape_global_markets
-from nti.scrapers.fred_api import scrape_us_10y_yield
-from nti.scrapers.nse_fii_dii import scrape_fii_dii_cash_flow
-from nti.scrapers.nse_options import scrape_put_call_ratio
-from nti.scrapers.tickertape_mmi import scrape_mmi_selenium
-from nti.scrapers.rbi_data import scrape_rbi_repo_rate
-from nti.scrapers.mospi_data import scrape_cpi_inflation
-from nti.scrapers.amfi_data import scrape_amfi_sip_flows
-from nti.scrapers.cnn_fear_greed import scrape_cnn_fear_greed
-from nti.scrapers.gift_nifty import scrape_gift_nifty
-from nti.scrapers.mmi_alternative import scrape_mmi_alternative
-
-# Indicators
-from nti.indicators.normalizer import normalize_all_indicators
-from nti.indicators.composite import compute_custom_fg_composite, compute_global_overnight_composite
-from nti.indicators.technical_display import compute_rsi, compute_macd
-
-# Model
-from nti.model.predictor import run_inference
-from nti.model.fallback import run_fallback_inference
-
-# Blog & News
-from nti.llm.blog_generator import generate_hourly_blog
-from nti.llm.news_analyzer import analyze_news
-
-# Changelog
-from nti.changelog.generator import generate_changelog, load_previous_run, save_current_run
-
-# Storage
-from nti.storage.csv_writer import write_hourly_csv
-from nti.storage.json_api import write_latest_json, write_history_json
-from nti.storage.blog_writer import write_blog_post
-from nti.storage.git_committer import git_commit_and_push
-
-# Notifications
-from nti.notifications.email_sender import send_zone_change_alert, send_big_move_alert
+from nti.pipelines.steps.scrape import run_scrape_step
+from nti.pipelines.steps.analyze import run_analyze_step
+from nti.pipelines.steps.blog import run_blog_step
+from nti.pipelines.steps.publish import run_publish_step
 
 logger = logging.getLogger(__name__)
 
 IST = timezone(timedelta(hours=5, minutes=30))
 
+# Per-step timeout in seconds (generous limits)
+STEP_TIMEOUTS = {
+    "scrape": 180,   # 3 min — scrapers can be slow
+    "analyze": 120,  # 2 min — includes news analysis LLM call
+    "blog": 180,     # 3 min — LLM blog generation
+    "publish": 60,   # 1 min — file writes + git push
+}
 
-def _safe_scrape(scraper_fn, scraper_name: str) -> dict:
-    """Run a scraper safely, returning empty dict on failure.
+# Total pipeline timeout (should fit within GitHub Actions 10-min default)
+TOTAL_TIMEOUT = 600  # 10 minutes
+
+
+def _run_step_with_timeout(step_name: str, step_fn, *args, **kwargs) -> tuple[dict | None, str | None]:
+    """Run a pipeline step with timeout and error handling.
+
+    Uses multiprocessing so timed-out steps can actually be terminated
+    (threading cannot kill a hung thread).
 
     Args:
-        scraper_fn: Callable that returns a dict
-        scraper_name: Human-readable name for logging
+        step_name: Name of the step (for logging)
+        step_fn: Callable to run
+        *args, **kwargs: Arguments to pass to step_fn
 
     Returns:
-        Dict from scraper, or empty dict on failure
+        Tuple of (result_dict or None, error_message or None)
     """
-    try:
-        result = scraper_fn()
-        logger.info(f"Scraper {scraper_name}: success ({len(result)} keys)")
-        return result
-    except Exception as e:
-        logger.warning(f"Scraper {scraper_name} failed: {e}")
-        return {}
+    import multiprocessing
+
+    timeout = STEP_TIMEOUTS.get(step_name, 120)
+    logger.info(f"Starting step '{step_name}' (timeout: {timeout}s)")
+
+    def _target(result_queue):
+        """Run in child process; put result or exception into queue."""
+        try:
+            result = step_fn(*args, **kwargs)
+            result_queue.put(("ok", result))
+        except Exception as e:
+            result_queue.put(("error", f"Step '{step_name}' failed: {e}"))
+
+    result_queue = multiprocessing.Queue()
+    proc = multiprocessing.Process(target=_target, args=(result_queue,), daemon=True)
+    proc.start()
+    proc.join(timeout=timeout)
+
+    if proc.is_alive():
+        # Process timed out — actually kill it
+        proc.terminate()
+        proc.join(timeout=5)
+        if proc.is_alive():
+            proc.kill()
+            proc.join(timeout=3)
+        result_queue.close()
+        result_queue.join_thread()
+        error = f"Step '{step_name}' timed out after {timeout}s"
+        logger.error(error)
+        return None, error
+
+    # Get result from queue
+    if not result_queue.empty():
+        status, payload = result_queue.get_nowait()
+        result_queue.close()
+        result_queue.join_thread()
+        if status == "ok":
+            return payload, None
+        else:
+            logger.error(payload)
+            return None, payload
+
+    # Process exited without putting anything in queue (crash)
+    result_queue.close()
+    result_queue.join_thread()
+    exitcode = proc.exitcode
+    error = f"Step '{step_name}' crashed (exit code {exitcode})"
+    logger.error(error)
+    return None, error
 
 
 def run_hourly_pipeline(dry_run: bool = False) -> dict:
-    """Run the full hourly NTI pipeline.
+    """Run the full hourly NTI pipeline using modular steps.
 
-    This is the main entry point called by GitHub Actions cron.
+    Each step is independently timed out. If a step fails, the pipeline
+    attempts to continue with remaining steps using any available data
+    from intermediate files (data/api/step_*.json).
 
     Args:
         dry_run: If True, don't write files or push to git
@@ -101,341 +132,136 @@ def run_hourly_pipeline(dry_run: bool = False) -> dict:
     """
     start_time = time.time()
     pipeline_errors: list[str] = []
+    step_results: dict = {}
 
     now_ist = datetime.now(IST)
     logger.info(f"=== NTI Hourly Pipeline Started at {now_ist.isoformat()} ===")
 
     # Check for holidays
     if is_market_holiday(now_ist.date()):
-        logger.info(f"Today is a market holiday — running in limited mode")
+        logger.info("Today is a market holiday — running in limited mode")
 
-    # -----------------------------------------------------------------------
+    # Default values for step results
+    raw_indicators = None
+    analyze_data = None
+    blog_data = None
+
+    # -------------------------------------------------------------------
     # STEP 1: Scrape all indicators
-    # -----------------------------------------------------------------------
-    logger.info("Step 1: Scraping indicators...")
-
-    raw_indicators: dict = {}
-
-    # NSE index data (PE, PB, VIX, dividend yield, advances/declines)
-    nse_data = _safe_scrape(scrape_nse_index_data, "NSE Indices")
-    raw_indicators.update(nse_data)
-
-    # Yahoo Finance (USD/INR, Brent Crude, S&P 500, global indices)
-    yf_data = _safe_scrape(scrape_global_markets, "Yahoo Finance")
-    raw_indicators.update(yf_data)
-
-    # FRED API (US 10-Year Yield)
-    fred_data = _safe_scrape(scrape_us_10y_yield, "FRED API")
-    raw_indicators.update(fred_data)
-
-    # FII/DII flows
-    fii_dii_data = _safe_scrape(scrape_fii_dii_cash_flow, "FII/DII")
-    raw_indicators.update(fii_dii_data)
-
-    # PCR from NSE options
-    pcr_data = _safe_scrape(lambda: scrape_put_call_ratio(), "NSE Options PCR")
-    raw_indicators.update(pcr_data)
-
-    # Tickertape MMI
-    mmi_data = _safe_scrape(scrape_mmi_selenium, "Tickertape MMI")
-    raw_indicators.update(mmi_data)
-
-    # RBI repo rate
-    rbi_data = _safe_scrape(scrape_rbi_repo_rate, "RBI Repo Rate")
-    raw_indicators.update(rbi_data)
-
-    # CPI inflation
-    cpi_data = _safe_scrape(scrape_cpi_inflation, "MOSPI CPI")
-    raw_indicators.update(cpi_data)
-
-    # AMFI SIP flows
-    sip_data = _safe_scrape(scrape_amfi_sip_flows, "AMFI SIP")
-    raw_indicators.update(sip_data)
-
-    # CNN Fear & Greed
-    cnn_data = _safe_scrape(scrape_cnn_fear_greed, "CNN F&G")
-    raw_indicators.update(cnn_data)
-
-    # GIFT Nifty pre-market
-    gift_data = _safe_scrape(scrape_gift_nifty, "GIFT Nifty")
-    raw_indicators.update(gift_data)
-
-    # Alternative MMI (fallback if Tickertape failed)
-    if raw_indicators.get("mmi_value") is None:
-        alt_mmi_data = _safe_scrape(scrape_mmi_alternative, "MMI Alternative")
-        if alt_mmi_data.get("mmi_value") is not None:
-            raw_indicators.update(alt_mmi_data)
-
-    # Count how many indicators we got
-    non_none_count = sum(1 for v in raw_indicators.values() if v is not None)
-    logger.info(f"Scraped {non_none_count}/{len(raw_indicators)} indicators with values")
-
-    # -----------------------------------------------------------------------
-    # STEP 2: Normalize indicators
-    # -----------------------------------------------------------------------
-    logger.info("Step 2: Normalizing indicators...")
-
-    normalized = normalize_all_indicators(raw_indicators)
-    logger.info(f"Normalized {len(normalized)} indicator scores")
-
-    # Compute composites
-    vix_norm = normalized.get("vix_normalized")
-    pcr_norm = normalized.get("pcr_normalized")
-    ad_ratio = raw_indicators.get("advance_decline_ratio")
-    hl_ratio = raw_indicators.get("high_low_ratio")
-
-    custom_fg = compute_custom_fg_composite(None, vix_norm, pcr_norm, ad_ratio, hl_ratio)
-    if custom_fg is not None:
-        raw_indicators["custom_fg_composite"] = custom_fg
-        normalized["custom_fg_composite"] = custom_fg
-
-    # Global overnight composite
-    global_overnight = compute_global_overnight_composite(
-        None,
-        raw_indicators.get("dow_jones_change"),
-        raw_indicators.get("nasdaq_change"),
-        raw_indicators.get("nikkei_change"),
-        raw_indicators.get("hang_seng_change"),
+    # -------------------------------------------------------------------
+    raw_indicators, scrape_error = _run_step_with_timeout(
+        "scrape", run_scrape_step, force=False
     )
-    if global_overnight is not None:
-        raw_indicators["global_overnight"] = global_overnight
+    if scrape_error:
+        pipeline_errors.append(scrape_error)
+    step_results["scrape"] = "ok" if raw_indicators else "failed"
 
-    # -----------------------------------------------------------------------
-    # STEP 3: LLM News Analysis
-    # -----------------------------------------------------------------------
-    logger.info("Step 3: Analyzing news...")
-
-    news_result = analyze_news()
-    if news_result:
-        raw_indicators["llm_news_danger"] = news_result.get("danger_score")
-        raw_indicators["llm_policy_flag"] = news_result.get("policy_flag")
-        raw_indicators["llm_geopolitical_score"] = news_result.get("geopolitical_risk")
-
-    # -----------------------------------------------------------------------
-    # STEP 4: Run ML inference
-    # -----------------------------------------------------------------------
-    logger.info("Step 4: Running NTI inference...")
-
-    # Load previous run data for lagged features
-    previous_run = load_previous_run()
-    prev_score = previous_run.get("nti_score")
-    score_yesterday = previous_run.get("nti_score_yesterday")
-    pe_5d_ago = previous_run.get("nifty_pe_5d_ago")
-    vix_5d_ago = previous_run.get("india_vix_5d_ago")
-
-    if settings.enable_model:
-        nti_result = run_inference(
-            raw_indicators,
-            previous_score=prev_score,
-            score_yesterday=score_yesterday,
-            pe_5d_ago=pe_5d_ago,
-            vix_5d_ago=vix_5d_ago,
-        )
+    # -------------------------------------------------------------------
+    # STEP 2: Analyze (normalize, inference, news, changelog)
+    # -------------------------------------------------------------------
+    if time.time() - start_time > TOTAL_TIMEOUT:
+        logger.error(f"Total pipeline timeout exceeded ({TOTAL_TIMEOUT}s) — skipping analyze")
+        pipeline_errors.append("Pipeline timed out before analyze step")
+        step_results["analyze"] = "skipped"
     else:
-        nti_result = run_fallback_inference(raw_indicators)
+        analyze_data, analyze_error = _run_step_with_timeout(
+            "analyze", run_analyze_step,
+            raw_indicators=raw_indicators,
+            force=False,
+        )
+        if analyze_error:
+            pipeline_errors.append(analyze_error)
+        step_results["analyze"] = "ok" if analyze_data else "failed"
 
-    nti_score = nti_result.get("nti_score", 50)
-    zone = nti_result.get("zone", get_zone(nti_score))
-    confidence = nti_result.get("confidence", 50)
-    is_fallback = nti_result.get("is_fallback", True)
-    top_drivers = nti_result.get("top_drivers", [])
+    # -------------------------------------------------------------------
+    # STEP 3: Generate blog post
+    # -------------------------------------------------------------------
+    if time.time() - start_time > TOTAL_TIMEOUT:
+        logger.error(f"Total pipeline timeout exceeded ({TOTAL_TIMEOUT}s) — skipping blog")
+        pipeline_errors.append("Pipeline timed out before blog step")
+        step_results["blog"] = "skipped"
+    else:
+        blog_data, blog_error = _run_step_with_timeout(
+            "blog", run_blog_step,
+            analyze_data=analyze_data,
+            force=False,
+        )
+        if blog_error:
+            pipeline_errors.append(blog_error)
+        step_results["blog"] = "ok" if blog_data else "failed"
 
-    logger.info(f"NTI Score: {nti_score:.1f} ({zone}) | Confidence: {confidence:.0f}% | Fallback: {is_fallback}")
+    # -------------------------------------------------------------------
+    # STEP 4: Publish (write files, alerts, git push)
+    # -------------------------------------------------------------------
+    if time.time() - start_time > TOTAL_TIMEOUT:
+        logger.error(f"Total pipeline timeout exceeded ({TOTAL_TIMEOUT}s) — skipping publish")
+        pipeline_errors.append("Pipeline timed out before publish step")
+        step_results["publish"] = "skipped"
+    else:
+        publish_result, publish_error = _run_step_with_timeout(
+            "publish", run_publish_step,
+            analyze_data=analyze_data,
+            blog_data=blog_data,
+            dry_run=dry_run,
+        )
+        if publish_error:
+            pipeline_errors.append(publish_error)
+        step_results["publish"] = "ok" if publish_result else "failed"
 
-    # Store in indicators for writing
-    raw_indicators["nti_score"] = nti_score
-    raw_indicators["nti_score_prev"] = prev_score
-    raw_indicators["zone"] = zone
-    raw_indicators["zone_prev"] = previous_run.get("zone", "UNKNOWN")
-    raw_indicators["confidence"] = confidence
-    raw_indicators["is_fallback"] = is_fallback
-    raw_indicators["model_version"] = nti_result.get("model_version", "rule-based")
-
-    # -----------------------------------------------------------------------
-    # STEP 5: Generate changelog
-    # -----------------------------------------------------------------------
-    logger.info("Step 5: Generating changelog...")
-
-    # Load previous stock picks for screener changelog
-    prev_stocks = previous_run.get("top_stocks", [])
-
-    changelog_text = generate_changelog(
-        current=raw_indicators,
-        previous=previous_run,
-        current_stocks=[],  # Populated by screener if available
-        previous_stocks=prev_stocks,
-    )
-
-    # -----------------------------------------------------------------------
-    # STEP 6: Generate blog post
-    # -----------------------------------------------------------------------
-    logger.info("Step 6: Generating blog post...")
-
-    # Determine blog type based on time
-    blog_type = _get_blog_type(now_ist)
-
-    # Format top drivers for blog
-    top_drivers_text = ""
-    if top_drivers:
-        driver_lines = []
-        for d in top_drivers[:5]:
-            indicator = d.get("indicator", d.get("feature", ""))
-            direction = d.get("direction", "")
-            label = d.get("label", indicator)
-            driver_lines.append(f"  {direction.upper()} {label}")
-        top_drivers_text = "\n".join(driver_lines)
-
-    # Format top stocks
-    top_stocks_formatted = "No screener data available this hour"
-    top_stock_symbols: list[str] = []
-
-    # Generate the blog
-    blog_result = generate_hourly_blog(
-        nti_score=nti_score,
-        prev_score=prev_score or nti_score,
-        confidence=confidence,
-        indicators=raw_indicators,
-        top_drivers=top_drivers,
-        top_stocks=[],
-        changelog_text=changelog_text,
-        blog_type=blog_type,
-    )
-
-    blog_markdown = blog_result.get("blog_markdown", "")
+    # -------------------------------------------------------------------
+    # Compile final results
+    # -------------------------------------------------------------------
+    # Extract key metrics from whichever step succeeded
+    nti_score = 50
+    zone = "UNKNOWN"
+    confidence = 50
+    is_fallback = True
+    indicators_scraped = 0
     blog_slug = now_ist.strftime("%Y-%m-%d-%H-%M")
 
-    # -----------------------------------------------------------------------
-    # STEP 7: Write data files
-    # -----------------------------------------------------------------------
-    if not dry_run:
-        logger.info("Step 7: Writing data files...")
+    if raw_indicators:
+        indicators_scraped = sum(1 for v in raw_indicators.values() if v is not None)
 
-        # Write hourly CSV
-        write_hourly_csv(raw_indicators)
+    if analyze_data:
+        nti_result = analyze_data.get("nti_result", {})
+        raw_ind = analyze_data.get("raw_indicators", {})
+        nti_score = nti_result.get("nti_score", raw_ind.get("nti_score", 50))
+        zone = nti_result.get("zone", raw_ind.get("zone", get_zone(nti_score)))
+        confidence = nti_result.get("confidence", raw_ind.get("confidence", 50))
+        is_fallback = nti_result.get("is_fallback", True)
+        indicators_scraped = sum(1 for v in raw_ind.values() if v is not None)
 
-        # Write API JSON files
-        driver_dicts = []
-        for d in top_drivers[:5]:
-            driver_dicts.append({
-                "indicator": d.get("indicator", d.get("feature", "")),
-                "label": d.get("label", d.get("indicator", "")),
-                "shap": d.get("shap", 0),
-                "direction": d.get("direction", ""),
-                "current_value": d.get("description", ""),
-            })
+    if blog_data:
+        blog_slug = blog_data.get("blog_slug", blog_slug)
 
-        write_latest_json(
-            indicators=raw_indicators,
-            nti_result=nti_result,
-            top_drivers=driver_dicts,
-            top_stocks=[],
-            blog_slug=blog_slug,
-        )
-
-        write_history_json()
-
-        # Write blog post
-        if blog_markdown:
-            write_blog_post(
-                blog_markdown=blog_markdown,
-                nti_score=nti_score,
-                prev_score=prev_score,
-                confidence=confidence,
-                nifty_price=raw_indicators.get("nifty_price"),
-                top_drivers=[d.get("indicator", d.get("feature", "")) for d in top_drivers[:5]],
-                top_stocks=top_stock_symbols,
-                blog_type=blog_type,
-            )
-
-        # Save current run for next comparison
-        save_current_run(raw_indicators)
-
-    # -----------------------------------------------------------------------
-    # STEP 8: Send alerts
-    # -----------------------------------------------------------------------
-    if not dry_run and settings.enable_email:
-        logger.info("Step 8: Checking for alerts...")
-
-        prev_zone = previous_run.get("zone", "UNKNOWN")
-
-        # Zone change alert
-        if zone != prev_zone and prev_zone != "UNKNOWN" and settings.alert_on_zone_change:
-            driver_names = [d.get("label", d.get("indicator", "")) for d in top_drivers[:3]]
-            try:
-                send_zone_change_alert(
-                    from_zone=prev_zone,
-                    to_zone=zone,
-                    score=nti_score,
-                    nifty_price=raw_indicators.get("nifty_price", 0),
-                    drivers=driver_names,
-                )
-                logger.info(f"Zone change alert sent: {prev_zone} → {zone}")
-            except Exception as e:
-                pipeline_errors.append(f"Email alert failed: {e}")
-
-        # Big move alert
-        if prev_score is not None and settings.alert_on_big_move:
-            move = abs(nti_score - prev_score)
-            if move >= settings.alert_big_move_threshold:
-                try:
-                    send_big_move_alert(prev_score, nti_score, raw_indicators.get("nifty_price", 0))
-                    logger.info(f"Big move alert sent: {move:.1f} points")
-                except Exception as e:
-                    pipeline_errors.append(f"Big move alert failed: {e}")
-
-    # -----------------------------------------------------------------------
-    # STEP 9: Git commit and push
-    # -----------------------------------------------------------------------
-    if not dry_run:
-        logger.info("Step 9: Git commit and push...")
-        git_commit_and_push()
-    else:
-        logger.info("[DRY RUN] Skipping git commit and push")
-
-    # -----------------------------------------------------------------------
-    # Done
-    # -----------------------------------------------------------------------
     duration = time.time() - start_time
-    raw_indicators["run_duration_seconds"] = round(duration, 1)
-    raw_indicators["errors"] = "; ".join(pipeline_errors) if pipeline_errors else ""
 
     logger.info(
         f"=== NTI Hourly Pipeline Complete ===\n"
         f"  Score: {nti_score:.1f} ({zone})\n"
         f"  Confidence: {confidence:.0f}%\n"
         f"  Fallback: {is_fallback}\n"
-        f"  Indicators: {non_none_count} scraped\n"
+        f"  Indicators: {indicators_scraped} scraped\n"
+        f"  Steps: {step_results}\n"
         f"  Duration: {duration:.1f}s\n"
         f"  Errors: {len(pipeline_errors)}"
     )
+
+    if pipeline_errors:
+        for err in pipeline_errors:
+            logger.error(f"  ERROR: {err}")
 
     return {
         "nti_score": nti_score,
         "zone": zone,
         "confidence": confidence,
         "is_fallback": is_fallback,
-        "indicators_scraped": non_none_count,
+        "indicators_scraped": indicators_scraped,
         "duration_seconds": duration,
         "blog_slug": blog_slug,
+        "step_results": step_results,
         "errors": pipeline_errors,
     }
-
-
-def _get_blog_type(now_ist: datetime) -> str:
-    """Determine blog type based on time of day."""
-    hour = now_ist.hour
-    minute = now_ist.minute
-
-    if hour == 9 and minute < 30:
-        return "market_open"
-    if hour == 15 and minute >= 15:
-        return "market_close"
-    if 9 <= hour <= 15:
-        return "mid_session"
-    if 16 <= hour <= 20:
-        return "post_market"
-    return "overnight"
-
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -444,4 +270,10 @@ if __name__ == "__main__":
     )
     result = run_hourly_pipeline()
     print(f"\nNTI Score: {result['nti_score']:.1f} ({result['zone']})")
-    print(f"Duration: {result['duration_seconds']:.1f}s")
+    print(f"Confidence: {result.get('confidence', 0):.0f}%")
+    print(f"Indicators: {result.get('indicators_scraped', 0)}")
+    print(f"Blog slug: {result.get('blog_slug', 'N/A')}")
+    print(f"Steps: {result.get('step_results', {})}")
+    print(f"Duration: {result.get('duration_seconds', 0):.1f}s")
+    if result.get('errors'):
+        print(f"Errors: {result['errors']}")

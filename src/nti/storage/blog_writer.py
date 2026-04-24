@@ -17,6 +17,41 @@ logger = logging.getLogger(__name__)
 IST = timezone(timedelta(hours=5, minutes=30))
 
 
+def _strip_existing_frontmatter(markdown: str) -> str:
+    """Strip any existing YAML frontmatter from markdown content.
+
+    The LLM sometimes generates its own frontmatter (--- ... ---), which
+    causes a double-frontmatter bug when blog_writer adds its own.
+    This function strips any existing frontmatter before we add ours.
+
+    Args:
+        markdown: Raw markdown content that may contain frontmatter
+
+    Returns:
+        Markdown content with frontmatter stripped
+    """
+    if not markdown or not markdown.strip():
+        return markdown
+
+    content = markdown.strip()
+    if content.startswith("---"):
+        # Find the closing --- of the frontmatter on its own line
+        # Frontmatter is: ---\n<yaml>\n---\n<content>
+        # We look for the second --- that appears at the start of a line
+        lines = content.split("\n")
+        if len(lines) >= 2:
+            # Skip the first line (opening ---)
+            for i in range(1, len(lines)):
+                if lines[i].strip() == "---":
+                    # Found closing --- — everything after it is the real content
+                    remaining = "\n".join(lines[i + 1:]).strip()
+                    logger.info(f"Stripped existing frontmatter from blog content ({len(markdown)} → {len(remaining)} chars)")
+                    return remaining
+            # No closing --- found — the opening --- might be a horizontal rule, leave as-is
+
+    return markdown
+
+
 def write_blog_post(
     blog_markdown: str,
     nti_score: float,
@@ -46,6 +81,10 @@ def write_blog_post(
     """
     if website_dir is None:
         website_dir = Path("website")
+
+    # Strip any existing frontmatter from blog_markdown to prevent
+    # double-frontmatter bug (LLM sometimes generates its own frontmatter)
+    blog_markdown = _strip_existing_frontmatter(blog_markdown)
 
     now_ist = datetime.now(IST)
     slug = now_ist.strftime("%Y-%m-%d-%H-%M")

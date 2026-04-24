@@ -260,16 +260,23 @@ def initialize_node(state: FusionState) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def fan_out_dispatch(state: FusionState) -> list[Send]:
+def fan_out_dispatch(state: FusionState) -> list[Send] | str:
     """Dispatch parallel generation calls to all enabled LLM providers.
 
     Uses LangGraph's Send() API for parallel execution (fan-out pattern).
     Each Send creates a separate execution of the 'generate_draft' node
     with a specific provider configuration.
+
+    Returns:
+        list[Send] to fan out generation, or "synthesize" to skip generation.
     """
     enabled_providers = settings.get_enabled_llm_providers()
     # Limit concurrent calls
     providers_to_call = enabled_providers[: settings.fusion_max_concurrent]
+
+    if not providers_to_call:
+        logger.warning("No LLM providers enabled — skipping generation")
+        return "synthesize"
 
     sends = []
     for provider in providers_to_call:
@@ -384,7 +391,7 @@ def generate_draft(state: DraftState) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def fan_out_critique_dispatch(state: FusionState) -> list[Send]:
+def fan_out_critique_dispatch(state: FusionState) -> list[Send] | str:
     """Dispatch parallel critique calls.
 
     Each enabled provider critiques the drafts from OTHER providers.
@@ -393,13 +400,16 @@ def fan_out_critique_dispatch(state: FusionState) -> list[Send]:
     With multi-model support (compound names like "groq/llama-3.3-70b"),
     models from the same provider can also critique each other when there
     are no drafts from other providers.
+
+    Returns:
+        list[Send] to fan out critiques, or "synthesize" to skip critiques.
     """
     successful_drafts = [d for d in state.get("drafts", []) if d.get("content") and not d.get("error")]
 
     if len(successful_drafts) < 2:
         # Need at least 2 drafts to critique each other
         logger.info("Fewer than 2 successful drafts — skipping critique round")
-        return []
+        return "synthesize"
 
     enabled_providers = settings.get_enabled_llm_providers()
     providers_to_call = enabled_providers[: settings.fusion_max_concurrent]
@@ -670,18 +680,23 @@ def build_fusion_graph() -> StateGraph:
     """Build the LangGraph multi-LLM fusion workflow.
 
     Graph structure:
-        initialize → fan_out_dispatch → generate_draft (parallel) → fan_out_critique_dispatch
-            → critique_draft (parallel) → synthesize → END
+        initialize → fan_out_dispatch → generate_draft (parallel)
+            → fan_out_critique_dispatch → critique_draft (parallel) OR synthesize
+            → synthesize → END
 
     If only 1 draft succeeds, critique is skipped.
     If no drafts succeed, the final_blog contains an error message.
+
+    Key: fan_out_dispatch and fan_out_critique_dispatch are used as
+    conditional edge functions (NOT nodes) so they can return Send()
+    objects for parallel fan-out, or a string node name for routing.
     """
     graph = StateGraph(FusionState)
 
-    # Add nodes
+    # Add nodes (fan_out_dispatch and fan_out_critique_dispatch are NOT nodes —
+    # they are conditional edge functions that return Send() or string)
     graph.add_node("initialize", initialize_node)
     graph.add_node("generate_draft", generate_draft)
-    graph.add_node("fan_out_critique_dispatch", fan_out_critique_dispatch)
     graph.add_node("critique_draft", critique_draft)
     graph.add_node("synthesize", synthesize_node)
 
@@ -689,21 +704,12 @@ def build_fusion_graph() -> StateGraph:
     graph.set_entry_point("initialize")
 
     # After initialization, fan out to parallel generation
-    graph.add_conditional_edges("initialize", fan_out_dispatch, ["generate_draft"])
+    # fan_out_dispatch returns list[Send] for fan-out, or "synthesize" if no providers
+    graph.add_conditional_edges("initialize", fan_out_dispatch, ["generate_draft", "synthesize"])
 
-    # After all drafts generated, go to critique dispatch
-    graph.add_edge("generate_draft", "fan_out_critique_dispatch")
-
-    # After critiques, go to synthesize
-    # If no critiques dispatched (fewer than 2 drafts), go straight to synthesize
-    graph.add_conditional_edges(
-        "fan_out_critique_dispatch",
-        lambda state: "critique_draft" if state.get("critiques") or _has_pending_critiques(state) else "synthesize",
-        {
-            "critique_draft": "critique_draft",
-            "synthesize": "synthesize",
-        },
-    )
+    # After all drafts generated, either fan out critiques or go straight to synthesize
+    # fan_out_critique_dispatch returns list[Send] for critique fan-out, or "synthesize"
+    graph.add_conditional_edges("generate_draft", fan_out_critique_dispatch, ["critique_draft", "synthesize"])
 
     # After critique, always go to synthesize
     graph.add_edge("critique_draft", "synthesize")
@@ -712,13 +718,6 @@ def build_fusion_graph() -> StateGraph:
     graph.add_edge("synthesize", END)
 
     return graph
-
-
-def _has_pending_critiques(state: FusionState) -> bool:
-    """Check if any critiques were dispatched (indirect check)."""
-    # If fan_out_critique_dispatch returned empty list, no critiques were sent
-    # In that case, the graph goes straight to synthesize
-    return False  # Simplified: rely on conditional edge logic
 
 
 def compile_fusion_graph():

@@ -24,10 +24,15 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  generate-signal:
+  # -----------------------------------------------------------------------
+  # Job 1: Data — Scrape indicators, normalize, run inference
+  # Fast job (~2-3 min), must always succeed so API JSON is updated
+  # -----------------------------------------------------------------------
+  data:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -46,7 +51,7 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
 
-      - name: Install Chrome (for Selenium)
+      - name: Install Chrome (for Selenium MMI)
         run: |
           sudo apt-get update -q
           sudo apt-get install -y google-chrome-stable
@@ -58,7 +63,13 @@ jobs:
           path: model_artifacts/
         continue-on-error: true
 
-      - name: Run hourly pipeline
+      - name: Run Step 1 — Scrape indicators
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: uv run python -m nti.pipelines.steps.scrape
+        continue-on-error: true
+
+      - name: Run Step 2 — Analyze (normalize, inference, news)
         env:
           LLM_GROQ_API_KEY: ${{ secrets.LLM_GROQ_API_KEY }}
           LLM_GROQ_BASE_URL: ${{ secrets.LLM_GROQ_BASE_URL }}
@@ -73,12 +84,28 @@ jobs:
           LLM_OPENROUTER_BASE_URL: ${{ secrets.LLM_OPENROUTER_BASE_URL }}
           LLM_OPENROUTER_MODEL: ${{ secrets.LLM_OPENROUTER_MODEL }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: uv run python -m nti.pipelines.steps.analyze
+        continue-on-error: true
+
+      # Publish data files even if blog hasn't been generated yet
+      - name: Upload intermediate step files
+        uses: actions/upload-artifact@v4
+        with:
+          name: nti-step-files
+          path: data/api/
+        continue-on-error: true
+
+      - name: Run Step 4 — Publish data (CSV, JSON, alerts, git push)
+        env:
+          LLM_GROQ_API_KEY: ${{ secrets.LLM_GROQ_API_KEY }}
+          LLM_GROQ_BASE_URL: ${{ secrets.LLM_GROQ_BASE_URL }}
+          LLM_GROQ_MODEL: ${{ secrets.LLM_GROQ_MODEL }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
           EMAIL_GMAIL_ADDRESS: ${{ secrets.EMAIL_GMAIL_ADDRESS }}
           EMAIL_GMAIL_APP_PASSWORD: ${{ secrets.EMAIL_GMAIL_APP_PASSWORD }}
           ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
-          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
-        run: uv run python -m nti.pipelines.hourly
+        run: uv run python -m nti.pipelines.steps.publish
         continue-on-error: true
 
       - name: Configure git
@@ -86,10 +113,96 @@ jobs:
           git config --local user.email "nti-bot@github.com"
           git config --local user.name "NTI Bot"
 
-      - name: Commit and push data + blog
+      - name: Commit and push data + API
         run: |
           git add data/ website/src/content/blog/ README.md
           git diff-index --quiet HEAD || git commit -m "NTI Update $(date -u '+%Y-%m-%d %H:%M') UTC"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin main && break || sleep 5
+          done
+
+  # -----------------------------------------------------------------------
+  # Job 2: Blog — Generate blog post via LLM (depends on data job)
+  # Slow job (~2-5 min), separate timeout, can fail without blocking data
+  # -----------------------------------------------------------------------
+  blog:
+    runs-on: ubuntu-latest
+    needs: data
+    permissions:
+      contents: write
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "latest"
+
+      - name: Setup Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Download intermediate step files from data job
+        uses: actions/download-artifact@v4
+        with:
+          name: nti-step-files
+          path: data/api/
+        continue-on-error: true
+
+      - name: Run Step 3 — Generate blog post
+        env:
+          LLM_GROQ_API_KEY: ${{ secrets.LLM_GROQ_API_KEY }}
+          LLM_GROQ_BASE_URL: ${{ secrets.LLM_GROQ_BASE_URL }}
+          LLM_GROQ_MODEL: ${{ secrets.LLM_GROQ_MODEL }}
+          LLM_GEMINI_API_KEY: ${{ secrets.LLM_GEMINI_API_KEY }}
+          LLM_GEMINI_BASE_URL: ${{ secrets.LLM_GEMINI_BASE_URL }}
+          LLM_GEMINI_MODEL: ${{ secrets.LLM_GEMINI_MODEL }}
+          LLM_CEREBRAS_API_KEY: ${{ secrets.LLM_CEREBRAS_API_KEY }}
+          LLM_CEREBRAS_BASE_URL: ${{ secrets.LLM_CEREBRAS_BASE_URL }}
+          LLM_CEREBRAS_MODEL: ${{ secrets.LLM_CEREBRAS_MODEL }}
+          LLM_OPENROUTER_API_KEY: ${{ secrets.LLM_OPENROUTER_API_KEY }}
+          LLM_OPENROUTER_BASE_URL: ${{ secrets.LLM_OPENROUTER_BASE_URL }}
+          LLM_OPENROUTER_MODEL: ${{ secrets.LLM_OPENROUTER_MODEL }}
+        run: uv run python -m nti.pipelines.steps.blog --force
+        continue-on-error: true
+
+      - name: Re-publish with blog (if blog was generated successfully)
+        env:
+          LLM_GROQ_API_KEY: ${{ secrets.LLM_GROQ_API_KEY }}
+          LLM_GROQ_BASE_URL: ${{ secrets.LLM_GROQ_BASE_URL }}
+          LLM_GROQ_MODEL: ${{ secrets.LLM_GROQ_MODEL }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          # Check if blog was generated and is valid
+          if [ -f data/api/step_blog.json ]; then
+            BLOG_VALID=$(uv run python -c "import json; d=json.load(open('data/api/step_blog.json')); print(d.get('blog_valid', False))")
+            if [ "$BLOG_VALID" = "True" ]; then
+              echo "Blog is valid — re-publishing with blog content"
+              uv run python -m nti.pipelines.steps.publish
+            else
+              echo "Blog is invalid/empty — skipping re-publish"
+            fi
+          else
+            echo "No blog data found — skipping re-publish"
+          fi
+        continue-on-error: true
+
+      - name: Configure git
+        run: |
+          git config --local user.email "nti-bot@github.com"
+          git config --local user.name "NTI Bot"
+
+      - name: Commit and push blog
+        run: |
+          git add data/ website/src/content/blog/
+          git diff-index --quiet HEAD || git commit -m "NTI Blog Update $(date -u '+%Y-%m-%d %H:%M') UTC"
           for i in 1 2 3 4 5; do
             git pull --rebase origin main && git push origin main && break || sleep 5
           done

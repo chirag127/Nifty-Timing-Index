@@ -209,6 +209,11 @@ driver/
 # Blog drafts (temporary)
 *.blog.draft.md
 
+# Pipeline intermediate step files (regenerated each run)
+data/api/step_scrape.json
+data/api/step_analyze.json
+data/api/step_blog.json
+
 # Website build output
 website/dist/
 website/.astro/
