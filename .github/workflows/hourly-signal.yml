@@ -90,4 +90,5 @@ jobs:
         run: |
           git add data/ website/src/content/blog/ README.md
           git diff-index --quiet HEAD || git commit -m "NTI Update $(date -u '+%Y-%m-%d %H:%M') UTC"
-          git push
+          git pull --rebase origin main
+          git push origin main

@@ -55,4 +55,5 @@ jobs:
           git config --local user.name "NTI Bot"
           git add data/model/ data/backtest/ data/api/backtest.json
           git diff-index --quiet HEAD || git commit -m "Daily retrain $(date -u '+%Y-%m-%d')"
-          git push
+          git pull --rebase origin main
+          git push origin main

@@ -47,4 +47,5 @@ jobs:
           git config --local user.name "NTI Bot"
           git add data/screener/
           git diff-index --quiet HEAD || git commit -m "Post-market screener $(date -u '+%Y-%m-%d')"
-          git push
+          git pull --rebase origin main
+          git push origin main

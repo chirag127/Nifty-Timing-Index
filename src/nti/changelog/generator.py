@@ -176,8 +176,12 @@ def generate_changelog(
         for key, display_name in TRACKED_INDICATORS.items():
             pv = previous.get(key)
             cv = current.get(key)
-            if pv is not None and cv is not None and abs(float(cv) - float(pv)) > 0.01:
-                driver_lines.append(f"- {display_name}: {float(pv):.2f} → {float(cv):.2f}")
+            try:
+                if pv is not None and cv is not None and abs(float(cv) - float(pv)) > 0.01:
+                    driver_lines.append(f"- {display_name}: {float(pv):.2f} → {float(cv):.2f}")
+            except (ValueError, TypeError):
+                if pv is not None and cv is not None and str(pv) != str(cv):
+                    driver_lines.append(f"- {display_name}: {pv} → {cv}")
 
         if driver_lines:
             alert_section += "\n".join(driver_lines[:5]) + "\n"
@@ -207,11 +211,19 @@ According to NTI's model, this zone suggests """
         cv = current.get(key)
         if pv is not None or cv is not None:
             unit = _get_unit(key)
-            change_str = _format_change(
-                float(pv) if pv is not None else None,
-                float(cv) if cv is not None else None,
-                unit,
-            )
+            try:
+                change_str = _format_change(
+                    float(pv) if pv is not None else None,
+                    float(cv) if cv is not None else None,
+                    unit,
+                )
+            except (ValueError, TypeError):
+                if pv is None or cv is None:
+                    change_str = f"→ {cv}{unit}" if cv is not None else "— (no data)"
+                elif str(pv) == str(cv):
+                    change_str = f"→ {cv}{unit} (no change)"
+                else:
+                    change_str = f"→ {cv}{unit} (was {pv})"
             indicator_changes.append(f"| {display_name} | {pv if pv is not None else '—'} | {cv if cv is not None else '—'} | {change_str} |")
 
     if indicator_changes:
