@@ -138,30 +138,12 @@ def generate_hourly_blog(
 
     blog_markdown = result.get("final_blog", "")
 
-    # Add frontmatter for Astro content collection
+    # Note: frontmatter is added by blog_writer.py when writing the .md file.
+    # Do NOT add frontmatter here to avoid double-frontmatter bug.
     slug = now.strftime("%Y-%m-%d-%H-%M")
-    frontmatter = f"""---
-title: "NTI Update: Score {nti_score:.0f} | {zone} Zone | Nifty at {indicators.get('nifty_price', 'N/A')} | {now.strftime('%Y-%m-%d %H:%M')} IST"
-description: "Nifty Timing Index hourly update: NTI score {nti_score:.0f} ({zone}). {'Zone changed from ' + prev_zone + '!' if zone != prev_zone else 'Score within same zone.'}"
-slug: "{slug}"
-publishedAt: "{now.isoformat()}"
-ntiScore: {nti_score}
-ntiZone: "{zone}"
-ntiZonePrev: "{prev_zone}"
-zoneChanged: {str(zone != prev_zone).lower()}
-confidence: {confidence}
-nifty50Price: {indicators.get('nifty_price', 0)}
-niftyBank: {indicators.get('nifty_bank_price', 0)}
-sensex: {indicators.get('sensex_price', 0)}
-topDrivers: {list(d.get('indicator', '') for d in top_drivers[:3])}
-topStocks: {list(s.get('symbol', '') for s in top_stocks[:5])}
-blogType: "{blog_type}"
----
-
-"""
 
     return {
-        "blog_markdown": frontmatter + blog_markdown,
+        "blog_markdown": blog_markdown,
         "slug": slug,
         "providers_used": result.get("providers_used", []),
         "errors": result.get("errors", []),

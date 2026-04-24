@@ -10,12 +10,12 @@ from __future__ import annotations
 import json
 import logging
 import time
+
+# Note: json is used for previous_run.json; time for duration tracking
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-from nti.config.settings import settings
 from nti.config.thresholds import get_zone
-from nti.config.holidays import is_market_holiday
 
 # Scrapers
 from nti.scrapers.nse_indices import scrape_nse_index_data
