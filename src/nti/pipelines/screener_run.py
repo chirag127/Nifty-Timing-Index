@@ -171,12 +171,15 @@ def run_screener(run_type: str = "pre_market", dry_run: bool = False) -> dict:
         stock["rank"] = rank
         psu_tag = "PSU bank" if stock.get("is_psu") and "bank" in stock.get("industry", "").lower() else \
                   "PSU" if stock.get("is_psu") else ""
+        # Pre-compute optional parts to avoid nested f-string with escaped quotes
+        roe_part = f", ROE {stock.get('roe', 0):.1f}%" if stock.get('roe') else ''
+        div_part = f", Div Yield {stock.get('dividend_yield', 0):.1f}%" if stock.get('dividend_yield') else ''
+
         stock["why_picked"] = (
             f"{psu_tag + ' ' if psu_tag else ''}"
             f"Low PE ({stock.get('pe', 0):.1f}x), "
             f"PB ({stock.get('pb', 0):.1f}x)"
-            f"{f', ROE {stock.get(\"roe\", 0):.1f}%' if stock.get('roe') else ''}"
-            f"{f', Div Yield {stock.get(\"dividend_yield\", 0):.1f}%' if stock.get('dividend_yield') else ''}"
+            f"{roe_part}{div_part}"
         ).strip()
 
     output = {
