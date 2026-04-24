@@ -4,7 +4,7 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  site: "https://nifty-timing-index.pages.dev",
+  site: "https://nti.oriz.in",
   output: "static",
   integrations: [
     react(),

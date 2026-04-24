@@ -1,9 +1,19 @@
 name: NTI Pre-Market Screener
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "src/nti/screener/**"
+      - "src/nti/pipelines/screener_run.py"
+      - "pyproject.toml"
+      - "uv.lock"
   schedule:
     - cron: "30 0 * * 1-5"  # 6:00 AM IST = 00:30 UTC, Mon–Fri only
   workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   screener:
@@ -12,11 +22,11 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: astral-sh/setup-uv@v4
+      - uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
 

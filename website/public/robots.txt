@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/auth/
 
-Sitemap: https://nifty-timing-index.pages.dev/sitemap.xml
+Sitemap: https://nti.oriz.in/sitemap.xml

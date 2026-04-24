@@ -1,6 +1,14 @@
 name: NTI Hourly Signal
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "src/nti/**"
+      - "data/api/**"
+      - "scripts/**"
+      - "pyproject.toml"
+      - "uv.lock"
   schedule:
     # Market hours (9 AM – 4 PM IST = 3:30–10:30 UTC): every hour
     - cron: "30 3-10 * * 1-5"
@@ -12,6 +20,9 @@ on:
     - cron: "30 3,7,11,15,19,23 * * 0,6"
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   generate-signal:
     runs-on: ubuntu-latest
@@ -20,12 +31,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
 
@@ -41,7 +52,7 @@ jobs:
           sudo apt-get install -y google-chrome-stable
 
       - name: Download latest ML model artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: nti-model
           path: model_artifacts/

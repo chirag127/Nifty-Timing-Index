@@ -1,9 +1,20 @@
 name: NTI Daily Model Retrain
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "src/nti/model/**"
+      - "src/nti/indicators/**"
+      - "src/nti/pipelines/daily_retrain.py"
+      - "pyproject.toml"
+      - "uv.lock"
   schedule:
     - cron: "30 20 * * *"  # 2:00 AM IST = 20:30 UTC previous day
   workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   retrain:
@@ -12,11 +23,11 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: astral-sh/setup-uv@v4
+      - uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
 
@@ -32,7 +43,7 @@ jobs:
         run: uv run python -m nti.pipelines.daily_retrain
 
       - name: Upload model artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nti-model
           path: model_artifacts/

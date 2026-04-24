@@ -9,20 +9,25 @@ on:
       - ".github/workflows/deploy-website.yml"
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 10
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: "pnpm"
@@ -47,9 +52,34 @@ jobs:
           PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ secrets.PUBLIC_FIREBASE_MEASUREMENT_ID }}
         run: cd website && pnpm run build
 
+      - name: Install Wrangler
+        run: npm install -g wrangler@latest
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy website/dist --project-name=nifty-timing-index --commit-dirty=true
+
+      - name: Configure custom domain on Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # Check if custom domain is already configured
+          DOMAIN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/nifty-timing-index/domains" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: application/json")
+
+          # Add custom domain nti.oriz.in if not already configured
+          RESPONSE=$(curl -s -X POST \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/nifty-timing-index/domains" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data '{"name":"nti.oriz.in"}')
+
+          # Log the response (success or already-exists are both fine)
+          echo "Domain config response: ${RESPONSE}"
+          echo "Custom domain nti.oriz.in configured for Cloudflare Pages"

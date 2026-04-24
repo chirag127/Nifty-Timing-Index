@@ -445,6 +445,13 @@ class Settings:
         self.cloudflare_api_token = _env("CLOUDFLARE_API_TOKEN")
         self.cloudflare_account_id = _env("CLOUDFLARE_ACCOUNT_ID")
         self.cloudflare_email = _env("CLOUDFLARE_EMAIL")
+        self.cloudflare_global_api_key = _env("CLOUDFLARE_GLOBAL_API_KEY")
+        self.cloudflare_origin_ca_key = _env("CLOUDFLARE_ORIGIN_CA_KEY")
+
+        # --- Spaceship (Domain Registrar & DNS) ---
+        self.spaceship_api_key = _env("SPACESHIP_API_KEY")
+        self.spaceship_api_secret = _env("SPACESHIP_API_SECRET")
+        self.spaceship_api_url = _env("SPACESHIP_API_URL", "https://spaceship.dev/api/v1")
 
         # --- Langfuse Observability ---
         self.langfuse_enabled = _env_bool("LANGFUSE_ENABLED")
