@@ -1,38 +1,42 @@
 {
-  "timestamp": "2026-04-24T17:59:13.781426+05:30",
+  "timestamp": "2026-04-24T19:18:29.110136+05:30",
   "market_status": "closed",
   "primary_index": "nifty_50",
   "indices": {
     "nifty_50": {
-      "score": null,
-      "zone": "UNKNOWN",
-      "confidence": 0
-    },
-    "nifty_bank": {
-      "score": null,
-      "zone": "UNKNOWN",
-      "confidence": 0
-    },
-    "sensex": {
-      "score": null,
-      "zone": "UNKNOWN",
-      "confidence": 0
-    },
-    "nifty_midcap_150": {
-      "score": null,
-      "zone": "UNKNOWN",
-      "confidence": 0
-    },
-    "nifty_smallcap_250": {
-      "score": null,
-      "zone": "UNKNOWN",
-      "confidence": 0
+      "score": 81.7,
+      "score_prev": null,
+      "zone": "STRONG_SELL",
+      "zone_prev": "UNKNOWN",
+      "zone_changed": false,
+      "confidence": 50.0,
+      "price": 23897.95,
+      "change_pct": 0.0
     }
   },
-  "indicators": {},
+  "indicators": {
+    "nifty_pe": 20.85,
+    "nifty_pb": 3.26,
+    "nifty_dy": 1.32,
+    "mmi": null,
+    "india_vix": 19.71,
+    "pcr": null,
+    "fii_cash_net": null,
+    "us_10y": null,
+    "usd_inr": 94.22799682617188,
+    "brent_crude": 99.22000122070312,
+    "llm_news_danger": null,
+    "cpi": 4.2,
+    "rbi_repo_rate": 6.5,
+    "cnn_fg": 1.0,
+    "gift_nifty_price": null,
+    "gift_nifty_signal": "Neutral",
+    "gift_nifty_change_pct": null
+  },
   "top_drivers": [],
   "top_stock_picks": [],
-  "latest_blog_slug": "",
-  "model_version": "none",
-  "model_confidence": 0
+  "latest_blog_slug": "2026-04-24-19-17",
+  "model_version": "rule-based",
+  "model_confidence": 50.0,
+  "is_fallback": true
 }
