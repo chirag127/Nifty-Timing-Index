@@ -274,5 +274,19 @@ import Layout from "../../layouts/Layout.astro";
     }
   }
 
+  /* Rebuild chart when theme changes (debounced to prevent rapid re-renders) */
+  let themeRebuildTimer: ReturnType<typeof setTimeout> | null = null;
+  const themeObserver = new MutationObserver(() => {
+    if (themeRebuildTimer) clearTimeout(themeRebuildTimer);
+    themeRebuildTimer = setTimeout(() => {
+      const chart = Chart.getChart("history-chart");
+      if (chart) {
+        chart.destroy();
+        loadHistory();
+      }
+    }, 200);
+  });
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
   loadHistory();
 </script>

@@ -9,11 +9,12 @@ const sorted = blogs.sort((a: any, b: any) =>
 
 function getZoneColor(z: string): string {
   const m: Record<string,string> = {
-    EXTREME_BUY:"#00ff88", STRONG_BUY:"#22c55e", BUY_LEAN:"#4ade80",
-    NEUTRAL:"#60a5fa", SELL_LEAN:"#fb923c", STRONG_SELL:"#ef4444", EXTREME_SELL:"#dc2626"
+    EXTREME_BUY:"var(--color-extreme-buy)", STRONG_BUY:"var(--color-strong-buy)", BUY_LEAN:"var(--color-buy-lean)",
+    NEUTRAL:"var(--color-neutral)", SELL_LEAN:"var(--color-sell-lean)", STRONG_SELL:"var(--color-strong-sell)", EXTREME_SELL:"var(--color-extreme-sell)"
   };
-  return m[z] || "#64748b";
+  return m[z] || "var(--color-text-muted)";
 }
+
 ---
 
 <Layout title="NTI Blog — Market Analysis & Updates" description="Hourly Indian market insights generated automatically by AI">

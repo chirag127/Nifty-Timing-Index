@@ -16,16 +16,6 @@ interface NTIChartProps {
   height?: number;
 }
 
-const ZONE_COLORS: Record<string, string> = {
-  EXTREME_BUY: "#00ff88",
-  STRONG_BUY: "#22c55e",
-  BUY_LEAN: "#4ade80",
-  NEUTRAL: "#60a5fa",
-  SELL_LEAN: "#fb923c",
-  STRONG_SELL: "#ef4444",
-  EXTREME_SELL: "#dc2626",
-};
-
 export default function NTIChart({ scores, showNifty = true, height = 300 }: NTIChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
@@ -125,7 +115,7 @@ export default function NTIChart({ scores, showNifty = true, height = 300 }: NTI
             borderWidth: 1,
             titleColor: textPrimary,
             bodyColor: textSecondary,
-            titleFont: { family: fontBody, weight: "600" },
+            titleFont: { family: fontBody, weight: 600 },
             bodyFont: { family: fontMono, size: 12 },
             cornerRadius: 8,
             padding: 10,
@@ -142,7 +132,7 @@ export default function NTIChart({ scores, showNifty = true, height = 300 }: NTI
             max: 100,
             ticks: { color: gold, font: { size: 10, family: fontMono } },
             grid: { color: `${border}40` },
-            title: { display: true, text: "NTI Score", color: gold, font: { size: 11, family: fontBody, weight: "500" } },
+            title: { display: true, text: "NTI Score", color: gold, font: { size: 11, family: fontBody, weight: 500 } },
           },
           ...(showNifty
             ? {
@@ -150,7 +140,7 @@ export default function NTIChart({ scores, showNifty = true, height = 300 }: NTI
                   position: "right" as const,
                   ticks: { color: blueSteel, font: { size: 10, family: fontMono } },
                   grid: { drawOnChartArea: false },
-                  title: { display: true, text: "Nifty 50", color: blueSteel, font: { size: 11, family: fontBody, weight: "500" } },
+                  title: { display: true, text: "Nifty 50", color: blueSteel, font: { size: 11, family: fontBody, weight: 500 } },
                 },
               }
             : {}),

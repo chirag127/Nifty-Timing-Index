@@ -17,17 +17,37 @@ const { title, description, ntiScore, ntiZone, ntiZonePrev, zoneChanged, confide
 
 function getZoneColor(zone: string): string {
   const colors: Record<string, string> = {
-    EXTREME_BUY: "#00ff88",
-    STRONG_BUY: "#22c55e",
-    BUY_LEAN: "#4ade80",
-    NEUTRAL: "#60a5fa",
-    SELL_LEAN: "#fb923c",
-    STRONG_SELL: "#ef4444",
-    EXTREME_SELL: "#dc2626",
+    EXTREME_BUY: "var(--color-extreme-buy)",
+    STRONG_BUY: "var(--color-strong-buy)",
+    BUY_LEAN: "var(--color-buy-lean)",
+    NEUTRAL: "var(--color-neutral)",
+    SELL_LEAN: "var(--color-sell-lean)",
+    STRONG_SELL: "var(--color-strong-sell)",
+    EXTREME_SELL: "var(--color-extreme-sell)",
   };
-  // Using hex instead of CSS vars for opacity concatenation (e.g. `${color}40`)
-  return colors[zone] || "#64748b";
+  return colors[zone] || "var(--color-text-muted)";
 }
+
+/* Zone hex for SVG / opacity use — kept as CSS custom property for theme switching */
+const ZONE_HEX_DARK: Record<string, string> = {
+  EXTREME_BUY: "rgba(0,255,136,0.25)",
+  STRONG_BUY: "rgba(34,197,94,0.25)",
+  BUY_LEAN: "rgba(74,222,128,0.25)",
+  NEUTRAL: "rgba(96,165,250,0.25)",
+  SELL_LEAN: "rgba(251,146,60,0.25)",
+  STRONG_SELL: "rgba(239,68,68,0.25)",
+  EXTREME_SELL: "rgba(220,38,38,0.25)",
+};
+
+const ZONE_HEX_LIGHT: Record<string, string> = {
+  EXTREME_BUY: "rgba(5,150,105,0.3)",
+  STRONG_BUY: "rgba(22,163,74,0.3)",
+  BUY_LEAN: "rgba(34,197,94,0.3)",
+  NEUTRAL: "rgba(59,130,246,0.3)",
+  SELL_LEAN: "rgba(234,88,12,0.3)",
+  STRONG_SELL: "rgba(220,38,38,0.3)",
+  EXTREME_SELL: "rgba(185,28,28,0.3)",
+};
 
 function getZoneEmoji(zone: string): string {
   const emojis: Record<string, string> = {
@@ -43,12 +63,14 @@ function getZoneEmoji(zone: string): string {
 }
 
 const zoneColor = getZoneColor(ntiZone);
+const zoneBorderDark = ZONE_HEX_DARK[ntiZone] || "rgba(100,116,139,0.25)";
+const zoneBorderLight = ZONE_HEX_LIGHT[ntiZone] || "rgba(100,116,139,0.3)";
 ---
 
 <Layout title={title} description={description}>
   <article class="blog-post animate-fade-in-up">
     {zoneChanged && (
-      <div class="zone-change-banner" style={`--zone-color: ${zoneColor}; border-color: ${zoneColor}40`}>
+      <div class="zone-change-banner" style={`--zone-color: ${zoneColor}; --zone-border-dark: ${zoneBorderDark}; --zone-border-light: ${zoneBorderLight}`}>
         <div class="zone-banner-dot" style={`background: ${zoneColor}`}></div>
         <div class="zone-banner-content">
           <strong>ZONE CHANGE ALERT</strong>
@@ -101,7 +123,7 @@ const zoneColor = getZoneColor(ntiZone);
     padding: 0.85rem 1.15rem;
     margin-bottom: 1.5rem;
     background: var(--color-bg-card);
-    border: 2px solid;
+    border: 2px solid var(--zone-border-dark, rgba(100,116,139,0.25));
     border-radius: var(--radius-lg);
     animation: pulse-glow 2.5s ease-in-out infinite;
   }
@@ -306,6 +328,7 @@ const zoneColor = getZoneColor(ntiZone);
   /* ---- Light Theme ---- */
   [data-theme="light"] .zone-change-banner {
     background: var(--color-bg-sunken);
+    border-color: var(--zone-border-light, rgba(100,116,139,0.3));
   }
 
   [data-theme="light"] .confidence-track {

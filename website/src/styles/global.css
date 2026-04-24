@@ -66,6 +66,12 @@
   --shadow-glow-crimson: 0 0 30px rgba(220, 38, 38, 0.1);
   --shadow-inner: inset 0 1px 0 rgba(255,255,255,0.03);
 
+  /* ---- Tier-specific colors (dark) ---- */
+  --color-tier-3: #a855f7;
+  --color-tier-3-text: #c084fc;
+  --color-tier-5: #fb923c;
+  --color-tier-5-text: #fb923c;
+
   /* ---- Transitions ---- */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 280ms cubic-bezier(0.4, 0, 0.2, 1);

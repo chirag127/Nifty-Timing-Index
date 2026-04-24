@@ -18,11 +18,23 @@ const timestamp = latestData?.timestamp ?? "";
 
 function getZoneColor(z: string): string {
   const m: Record<string,string> = {
-    EXTREME_BUY:"#00ff88", STRONG_BUY:"#22c55e", BUY_LEAN:"#4ade80",
-    NEUTRAL:"#60a5fa", SELL_LEAN:"#fb923c", STRONG_SELL:"#ef4444", EXTREME_SELL:"#dc2626"
+    EXTREME_BUY:"var(--color-extreme-buy)", STRONG_BUY:"var(--color-strong-buy)", BUY_LEAN:"var(--color-buy-lean)",
+    NEUTRAL:"var(--color-neutral)", SELL_LEAN:"var(--color-sell-lean)", STRONG_SELL:"var(--color-strong-sell)", EXTREME_SELL:"var(--color-extreme-sell)"
   };
-  return m[z] || "#64748b";
+  return m[z] || "var(--color-text-muted)";
 }
+
+/* RGBA glow values for SVG drop-shadow (dark + light variants as CSS custom properties) */
+const ZONE_GLOW_DARK: Record<string,string> = {
+  EXTREME_BUY:"rgba(0,255,136,0.25)", STRONG_BUY:"rgba(34,197,94,0.25)", BUY_LEAN:"rgba(74,222,128,0.25)",
+  NEUTRAL:"rgba(96,165,250,0.25)", SELL_LEAN:"rgba(251,146,60,0.25)", STRONG_SELL:"rgba(239,68,68,0.25)", EXTREME_SELL:"rgba(220,38,38,0.25)"
+};
+const ZONE_GLOW_LIGHT: Record<string,string> = {
+  EXTREME_BUY:"rgba(5,150,105,0.2)", STRONG_BUY:"rgba(22,163,74,0.2)", BUY_LEAN:"rgba(34,197,94,0.2)",
+  NEUTRAL:"rgba(59,130,246,0.2)", SELL_LEAN:"rgba(234,88,12,0.2)", STRONG_SELL:"rgba(220,38,38,0.2)", EXTREME_SELL:"rgba(185,28,28,0.2)"
+};
+const zoneGlowDark = ZONE_GLOW_DARK[zone] || "rgba(100,116,139,0.25)";
+const zoneGlowLight = ZONE_GLOW_LIGHT[zone] || "rgba(100,116,139,0.2)";
 ---
 
 <Layout title={`NTI Dashboard — Score ${score} | ${zone.replace(/_/g," ")}`} description="Live Nifty Timing Index dashboard with hourly market analysis">
@@ -44,15 +56,16 @@ function getZoneColor(z: string): string {
                   <stop offset="100%" stop-color="var(--color-extreme-sell)"/>
                 </linearGradient>
               </defs>
-              <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--color-bg-elevated)" stroke-width="12" stroke-linecap="round"/>
+              <path class="gauge-bg-arc" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--color-bg-elevated)" stroke-width="12" stroke-linecap="round"/>
               <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#gauge-grad)" stroke-width="12" stroke-linecap="round"
                 stroke-dasharray="251.3"
                 stroke-dashoffset={251.3 - (251.3 * score / 100)}
-                style={`filter: drop-shadow(0 0 8px ${getZoneColor(zone)}40); transition: stroke-dashoffset 0.8s ease`}/>
+                class="gauge-arc"
+                style={`--zone-glow-dark: ${zoneGlowDark}; --zone-glow-light: ${zoneGlowLight}; transition: stroke-dashoffset 0.8s ease`}/>
             </svg>
             <div class="gauge-center">
               <span class="gauge-score mono" style={`color: ${getZoneColor(zone)}`}>{score}</span>
-              <span class="gauge-zone" style={`color: ${getZoneColor(zone)}`}>{zone.replace(/_/g," ")}</span>
+              <span class="gauge-zone" style={`color: ${getZoneColor(zone)}`}>{zone.replace(/_/g, " ")}</span>
             </div>
           </div>
           <div class="gauge-meta">
@@ -75,10 +88,10 @@ function getZoneColor(z: string): string {
           <div class="index-list">
             {Object.entries(latestData?.indices ?? {}).map(([name, data]: [string, any]) => (
               <div class="index-row" style={`border-left-color: ${getZoneColor(data.zone)}`}>
-                <span class="index-name">{name.replace(/_/g," ").replace(/\b\w/g,l=>l.toUpperCase())}</span>
+                <span class="index-name">{name.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</span>
                 <span class="index-score mono" style={`color: ${getZoneColor(data.zone)}`}>{data.score ?? "—"}</span>
-                <span class="badge" style={`background: ${getZoneColor(data.zone)}12; color: ${getZoneColor(data.zone)}; border-color: ${getZoneColor(data.zone)}25`}>
-                  {(data.zone ?? "").replace(/_/g," ")}
+                <span class={`badge zone-badge zone-${(data.zone ?? "").toLowerCase().replace(/_/g, "-")}`} style={`color: ${getZoneColor(data.zone)}`}>
+                  {(data.zone ?? "").replace(/_/g, " ")}
                 </span>
               </div>
             ))}
@@ -315,7 +328,15 @@ function getZoneColor(z: string): string {
   .view-all-link:hover { color: var(--color-gold-bright); transform: translateX(2px); }
 
   /* ---- Light Theme ---- */
-  [data-theme="light"] .gauge-svg path[stroke="var(--color-bg-elevated)"] {
+  .gauge-arc {
+    filter: drop-shadow(0 0 8px var(--zone-glow-dark, rgba(100,116,139,0.25)));
+  }
+
+  [data-theme="light"] .gauge-arc {
+    filter: drop-shadow(0 0 8px var(--zone-glow-light, rgba(100,116,139,0.2)));
+  }
+
+  [data-theme="light"] .gauge-bg-arc {
     stroke: var(--color-border-subtle);
   }
 
@@ -329,6 +350,25 @@ function getZoneColor(z: string): string {
   [data-theme="light"] .indicator-chip {
     background: var(--color-bg-sunken);
   }
+
+  /* ---- Zone badge backgrounds (dark) ---- */
+  .zone-badge { border: 1px solid transparent; }
+  .zone-extreme-buy { background: rgba(0,255,136,0.07); border-color: rgba(0,255,136,0.15); }
+  .zone-strong-buy { background: rgba(34,197,94,0.07); border-color: rgba(34,197,94,0.15); }
+  .zone-buy-lean { background: rgba(74,222,128,0.07); border-color: rgba(74,222,128,0.15); }
+  .zone-neutral { background: rgba(96,165,250,0.07); border-color: rgba(96,165,250,0.15); }
+  .zone-sell-lean { background: rgba(251,146,60,0.07); border-color: rgba(251,146,60,0.15); }
+  .zone-strong-sell { background: rgba(239,68,68,0.07); border-color: rgba(239,68,68,0.15); }
+  .zone-extreme-sell { background: rgba(220,38,38,0.07); border-color: rgba(220,38,38,0.15); }
+
+  /* ---- Zone badge backgrounds (light) ---- */
+  [data-theme="light"] .zone-extreme-buy { background: rgba(5,150,105,0.08); border-color: rgba(5,150,105,0.2); }
+  [data-theme="light"] .zone-strong-buy { background: rgba(22,163,74,0.08); border-color: rgba(22,163,74,0.2); }
+  [data-theme="light"] .zone-buy-lean { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.2); }
+  [data-theme="light"] .zone-neutral { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.2); }
+  [data-theme="light"] .zone-sell-lean { background: rgba(234,88,12,0.08); border-color: rgba(234,88,12,0.2); }
+  [data-theme="light"] .zone-strong-sell { background: rgba(220,38,38,0.08); border-color: rgba(220,38,38,0.2); }
+  [data-theme="light"] .zone-extreme-sell { background: rgba(185,28,28,0.08); border-color: rgba(185,28,28,0.2); }
 
   [data-theme="light"] .blog-placeholder {
     background: var(--color-bg-sunken);

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 interface Stock {
   rank: number;
@@ -34,6 +34,16 @@ export default function StockTable({ stocks, psuOnly = false }: StockTableProps)
   const [sortKey, setSortKey] = useState<SortKey>("composite_score");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [filter, setFilter] = useState("");
+  const [isLight, setIsLight] = useState(false);
+
+  /* Detect theme changes */
+  useEffect(() => {
+    const check = () => setIsLight(document.documentElement.getAttribute("data-theme") === "light");
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
 
   const filtered = useMemo(() => {
     let list = stocks;
@@ -180,7 +190,7 @@ export default function StockTable({ stocks, psuOnly = false }: StockTableProps)
                       color: "var(--color-gold-bright)",
                       borderRadius: "var(--radius-sm)",
                       fontWeight: 600,
-                      border: "1px solid rgba(245,158,11,0.2)",
+                      border: `1px solid ${isLight ? "rgba(245,158,11,0.25)" : "rgba(245,158,11,0.2)"}`,
                     }}
                   >
                     PSU
