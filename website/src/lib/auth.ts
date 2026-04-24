@@ -1,5 +1,7 @@
 import {
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   type User,
@@ -57,10 +59,7 @@ const DEFAULT_PREFS: UserPreferences = {
 };
 
 // ── Auth ───────────────────────────────────────────────────────────────
-export async function signInWithGoogle(): Promise<User> {
-  const result = await signInWithPopup(auth, googleProvider);
-  // Create or update user document on first login
-  const user = result.user;
+async function upsertUserDoc(user: User): Promise<void> {
   const userRef = doc(db, "users", user.uid);
   const snap = await getDoc(userRef);
   if (!snap.exists()) {
@@ -73,7 +72,6 @@ export async function signInWithGoogle(): Promise<User> {
       preferences: DEFAULT_PREFS,
     });
   } else {
-    // Update last login & profile info
     await setDoc(
       userRef,
       {
@@ -85,7 +83,32 @@ export async function signInWithGoogle(): Promise<User> {
       { merge: true }
     );
   }
-  return user;
+}
+
+export async function signInWithGoogle(): Promise<User> {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    await upsertUserDoc(result.user);
+    return result.user;
+  } catch (err: any) {
+    // Fallback to redirect only when browser blocks popups entirely
+    if (err?.code === "auth/popup-blocked") {
+      await signInWithRedirect(auth, googleProvider);
+      // Result handled by handleRedirectResult() on page load
+      throw new Error("REDIRECT_IN_PROGRESS");
+    }
+    throw err;
+  }
+}
+
+/** Call on page load to handle redirect-based sign-in result */
+export async function handleRedirectResult(): Promise<User | null> {
+  const result = await getRedirectResult(auth);
+  if (result) {
+    await upsertUserDoc(result.user);
+    return result.user;
+  }
+  return null;
 }
 
 export async function signOutUser(): Promise<void> {

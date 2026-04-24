@@ -349,6 +349,7 @@ import Layout from "../../layouts/Layout.astro";
 <script>
   import {
     signInWithGoogle,
+    handleRedirectResult,
     signOutUser,
     onAuthChange,
     getUserPreferences,
@@ -389,7 +390,11 @@ import Layout from "../../layouts/Layout.astro";
     userEmail.textContent = email;
 
     if (photoURL) {
-      userAvatar.innerHTML = `<img src="${photoURL}" alt="${name}" referrerpolicy="no-referrer" />`;
+      const img = document.createElement("img");
+      img.src = photoURL;
+      img.alt = name;
+      img.referrerPolicy = "no-referrer";
+      userAvatar.replaceChildren(img);
     } else {
       const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
       userAvatar.textContent = initials || "?";
@@ -491,7 +496,10 @@ import Layout from "../../layouts/Layout.astro";
   function renderAlertHistory(alerts: AlertRecord[]) {
     alertList.innerHTML = "";
     if (alerts.length === 0) {
-      alertList.innerHTML = '<p class="empty-hint">No alerts triggered yet.</p>';
+      const p = document.createElement("p");
+      p.className = "empty-hint";
+      p.textContent = "No alerts triggered yet.";
+      alertList.replaceChildren(p);
       return;
     }
     for (const a of alerts) {
@@ -518,17 +526,24 @@ import Layout from "../../layouts/Layout.astro";
 
   // ── Event handlers ─────────────────────────────────────────────────
 
+  // Handle redirect-based sign-in result on page load (mobile fallback)
+  handleRedirectResult().catch((err) => {
+    console.error("Redirect result error:", err);
+  });
+
   // Google login
   loginBtn.addEventListener("click", async () => {
     loginBtn.disabled = true;
     loginError.style.display = "none";
     try {
-      const user = await signInWithGoogle();
+      await signInWithGoogle();
       // onAuthChange listener will handle showing authenticated state + loading data
     } catch (err: any) {
       console.error("Login failed:", err);
-      // Ignore popup-closed errors
-      if (err?.code !== "auth/popup-closed-by-user") {
+      // Ignore popup-closed and redirect-in-progress errors
+      if (err?.code === "auth/popup-closed-by-user" || err?.message === "REDIRECT_IN_PROGRESS") {
+        // Redirect is in progress — user will come back to this page
+      } else {
         loginError.textContent = err?.message || "Login failed. Please try again.";
         loginError.style.display = "block";
       }
