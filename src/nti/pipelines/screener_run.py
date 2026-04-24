@@ -22,7 +22,7 @@ from pathlib import Path
 
 from nti.config.settings import settings
 from nti.screener.universe import build_stock_universe
-from nti.screener.fundamentals import fetch_batch_fundamentals
+from nti.screener.fundamentals import batch_fetch_fundamentals
 from nti.screener.filters import passes_hard_filters, get_soft_warnings
 from nti.screener.scorer import compute_composite_scores
 from nti.screener.analyst_ratings import fetch_analyst_ratings
@@ -70,7 +70,7 @@ def run_screener(run_type: str = "pre_market", dry_run: bool = False) -> dict:
     logger.info("Step 2: Fetching fundamentals (this may take a while)...")
 
     symbols = universe["symbol"].tolist()
-    fundamentals = fetch_batch_fundamentals(symbols)
+    fundamentals = batch_fetch_fundamentals(symbols)
     logger.info(f"Fetched fundamentals for {len(fundamentals)} stocks")
 
     # -------------------------------------------------------------------
