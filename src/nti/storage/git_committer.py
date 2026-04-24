@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import subprocess
+import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -72,14 +73,23 @@ def git_commit_and_push(
         logger.warning(f"Git commit failed: {result.stderr}")
         return False
 
-    # Push
-    result = _run_git(["push"], check=False)
-    if result.returncode != 0:
-        logger.warning(f"Git push failed: {result.stderr}")
-        return False
+    # Push with retry logic for concurrent pipeline executions
+    max_retries = 3
+    for attempt in range(1, max_retries + 1):
+        # Pull latest changes with rebase to avoid merge commits
+        _run_git(["pull", "--rebase", "origin", "main"], check=False)
 
-    logger.info(f"Git commit and push succeeded: {message}")
-    return True
+        result = _run_git(["push"], check=False)
+        if result.returncode == 0:
+            logger.info(f"Git commit and push succeeded: {message}")
+            return True
+        
+        logger.warning(f"Git push failed (attempt {attempt}/{max_retries}): {result.stderr}")
+        if attempt < max_retries:
+            time.sleep(2)  # Wait briefly before retrying
+            
+    logger.error("Git push failed after all retries.")
+    return False
 
 
 def _run_git(args: list[str], check: bool = True) -> subprocess.CompletedProcess:
