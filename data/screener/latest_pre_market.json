@@ -1,11 +1,1432 @@
 {
-  "screened_at": null,
+  "screened_at": "2026-04-24T18:31:32.702152+05:30",
   "run_type": "pre_market",
-  "nti_score_at_screen": null,
-  "universe_size": 0,
-  "passing_filters": 0,
-  "top_picks": [],
-  "sector_summary": {},
-  "exclusion_summary": {},
-  "psu_stocks_count": 0
+  "universe_size": 2167,
+  "passing_filters": 201,
+  "top_picks": [
+    {
+      "symbol": "IOC",
+      "pe": 5.528709,
+      "pb": 1.0018924,
+      "market_cap_cr": 202597.4,
+      "dividend_yield": 687.0,
+      "roe": 0.0,
+      "debt_equity": 72.631,
+      "current_price": 143.47,
+      "sector": "Energy",
+      "industry": "Oil & Gas Refining & Marketing",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 72.6 (> 1.0)"
+      ],
+      "is_psu": true,
+      "psu_boost": 10.0,
+      "value_score": 89.3,
+      "quality_score": 66.4,
+      "analyst_score": 50.0,
+      "composite_score": 84.6,
+      "rank": 1,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "PSU Low PE (5.5x), PB (1.0x), Div Yield 687.0%"
+    },
+    {
+      "symbol": "BPCL",
+      "pe": 5.3498874,
+      "pb": 1.4014866,
+      "market_cap_cr": 133669.4,
+      "dividend_yield": 646.0,
+      "roe": 0.0,
+      "debt_equity": 56.386,
+      "current_price": 308.1,
+      "sector": "Energy",
+      "industry": "Oil & Gas Refining & Marketing",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 56.4 (> 1.0)"
+      ],
+      "is_psu": true,
+      "psu_boost": 10.0,
+      "value_score": 83.0,
+      "quality_score": 68.6,
+      "analyst_score": 50.0,
+      "composite_score": 82.1,
+      "rank": 2,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "PSU Low PE (5.3x), PB (1.4x), Div Yield 646.0%"
+    },
+    {
+      "symbol": "BANKINDIA",
+      "pe": 6.8354197,
+      "pb": 0.7765682,
+      "market_cap_cr": 67124.5,
+      "dividend_yield": 268.0,
+      "roe": 12.049999999999999,
+      "debt_equity": NaN,
+      "current_price": 147.44,
+      "sector": "Financial Services",
+      "industry": "Banks - Regional",
+      "warnings": [],
+      "is_psu": true,
+      "psu_boost": 10.0,
+      "value_score": 87.5,
+      "quality_score": 61.3,
+      "analyst_score": 50.0,
+      "composite_score": 82.1,
+      "rank": 3,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "PSU bank Low PE (6.8x), PB (0.8x), ROE 12.0%, Div Yield 268.0%"
+    },
+    {
+      "symbol": "BANKBARODA",
+      "pe": 7.2829437,
+      "pb": 0.86287165,
+      "market_cap_cr": 141762.6,
+      "dividend_yield": 302.0,
+      "roe": 12.812999999999999,
+      "debt_equity": NaN,
+      "current_price": 274.13,
+      "sector": "Financial Services",
+      "industry": "Banks - Regional",
+      "warnings": [],
+      "is_psu": true,
+      "psu_boost": 10.0,
+      "value_score": 86.3,
+      "quality_score": 61.6,
+      "analyst_score": 50.0,
+      "composite_score": 81.6,
+      "rank": 4,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "PSU bank Low PE (7.3x), PB (0.9x), ROE 12.8%, Div Yield 302.0%"
+    },
+    {
+      "symbol": "CANBK",
+      "pe": 6.324652,
+      "pb": 1.088906,
+      "market_cap_cr": 127760.1,
+      "dividend_yield": 284.0,
+      "roe": 18.215,
+      "debt_equity": NaN,
+      "current_price": 140.85,
+      "sector": "Financial Services",
+      "industry": "Banks - Regional",
+      "warnings": [],
+      "is_psu": true,
+      "psu_boost": 10.0,
+      "value_score": 84.0,
+      "quality_score": 65.2,
+      "analyst_score": 50.0,
+      "composite_score": 81.6,
+      "rank": 5,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "PSU bank Low PE (6.3x), PB (1.1x), ROE 18.2%, Div Yield 284.0%"
+    },
+    {
+      "symbol": "GICRE",
+      "pe": 7.2516856,
+      "pb": 0.7011985,
+      "market_cap_cr": 69807.6,
+      "dividend_yield": 250.99999999999997,
+      "roe": 10.142,
+      "debt_equity": NaN,
+      "current_price": 397.9,
+      "sector": "Financial Services",
+      "industry": "Insurance - Reinsurance",
+      "warnings": [
+        "Low ROE: 10.1% (< 12%)"
+      ],
+      "is_psu": true,
+      "psu_boost": 10.0,
+      "value_score": 86.8,
+      "quality_score": 60.7,
+      "analyst_score": 50.0,
+      "composite_score": 81.6,
+      "rank": 6,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "PSU Low PE (7.3x), PB (0.7x), ROE 10.1%, Div Yield 251.0%"
+    },
+    {
+      "symbol": "GOCLCORP",
+      "pe": 6.270669,
+      "pb": 0.5645897,
+      "market_cap_cr": 1579.1,
+      "dividend_yield": 307.0,
+      "roe": 0.0,
+      "debt_equity": 5.952,
+      "current_price": 318.55,
+      "sector": "Basic Materials",
+      "industry": "Specialty Chemicals",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 6.0 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 92.5,
+      "quality_score": 83.9,
+      "analyst_score": 50.0,
+      "composite_score": 81.4,
+      "rank": 7,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (6.3x), PB (0.6x), Div Yield 307.0%"
+    },
+    {
+      "symbol": "CENTRALBK",
+      "pe": 6.619485,
+      "pb": 0.82319856,
+      "market_cap_cr": 32594.1,
+      "dividend_yield": 218.00000000000003,
+      "roe": 13.225999999999999,
+      "debt_equity": NaN,
+      "current_price": 36.01,
+      "sector": "Financial Services",
+      "industry": "Banks - Regional",
+      "warnings": [],
+      "is_psu": true,
+      "psu_boost": 10.0,
+      "value_score": 84.4,
+      "quality_score": 62.2,
+      "analyst_score": 50.0,
+      "composite_score": 80.9,
+      "rank": 8,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "PSU bank Low PE (6.6x), PB (0.8x), ROE 13.2%, Div Yield 218.0%"
+    },
+    {
+      "symbol": "GSFC",
+      "pe": 9.909091,
+      "pb": 0.5507233,
+      "market_cap_cr": 6862.6,
+      "dividend_yield": 287.0,
+      "roe": 0.0,
+      "debt_equity": 0.011,
+      "current_price": 172.22,
+      "sector": "Basic Materials",
+      "industry": "Agricultural Inputs",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 84.3,
+      "quality_score": 92.2,
+      "analyst_score": 50.0,
+      "composite_score": 79.8,
+      "rank": 9,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (9.9x), PB (0.6x), Div Yield 287.0%"
+    },
+    {
+      "symbol": "JAGRAN",
+      "pe": 8.7245035,
+      "pb": 0.73897487,
+      "market_cap_cr": 1433.7,
+      "dividend_yield": 902.0,
+      "roe": 0.0,
+      "debt_equity": 9.556,
+      "current_price": 65.87,
+      "sector": "Communication Services",
+      "industry": "Publishing",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 9.6 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 88.3,
+      "quality_score": 82.5,
+      "analyst_score": 50.0,
+      "composite_score": 78.9,
+      "rank": 10,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (8.7x), PB (0.7x), Div Yield 902.0%"
+    },
+    {
+      "symbol": "ALEMBICLTD",
+      "pe": 7.360708,
+      "pb": 0.926457,
+      "market_cap_cr": 2347.5,
+      "dividend_yield": 257.0,
+      "roe": 0.0,
+      "debt_equity": 0.496,
+      "current_price": 91.42,
+      "sector": "Real Estate",
+      "industry": "Real Estate - Development",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 82.9,
+      "quality_score": 90.2,
+      "analyst_score": 50.0,
+      "composite_score": 78.5,
+      "rank": 11,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (7.4x), PB (0.9x), Div Yield 257.0%"
+    },
+    {
+      "symbol": "GAIL",
+      "pe": 12.690421,
+      "pb": 1.235324,
+      "market_cap_cr": 108889.9,
+      "dividend_yield": 758.0,
+      "roe": 0.0,
+      "debt_equity": 25.373,
+      "current_price": 165.61,
+      "sector": "Utilities",
+      "industry": "Utilities - Regulated Gas",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 25.4 (> 1.0)"
+      ],
+      "is_psu": true,
+      "psu_boost": 10.0,
+      "value_score": 71.0,
+      "quality_score": 75.3,
+      "analyst_score": 50.0,
+      "composite_score": 78.1,
+      "rank": 12,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "PSU Low PE (12.7x), PB (1.2x), Div Yield 758.0%"
+    },
+    {
+      "symbol": "MAITHANALL",
+      "pe": 6.563506,
+      "pb": 0.70523715,
+      "market_cap_cr": 2908.0,
+      "dividend_yield": 217.0,
+      "roe": 0.0,
+      "debt_equity": 10.735,
+      "current_price": 998.9,
+      "sector": "Basic Materials",
+      "industry": "Steel",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 10.7 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 86.6,
+      "quality_score": 81.7,
+      "analyst_score": 50.0,
+      "composite_score": 77.8,
+      "rank": 13,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (6.6x), PB (0.7x), Div Yield 217.0%"
+    },
+    {
+      "symbol": "GNFC",
+      "pe": 11.032737,
+      "pb": 0.79607314,
+      "market_cap_cr": 6883.4,
+      "dividend_yield": 373.0,
+      "roe": 0.0,
+      "debt_equity": 0.15,
+      "current_price": 468.45,
+      "sector": "Basic Materials",
+      "industry": "Chemicals",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 80.0,
+      "quality_score": 91.0,
+      "analyst_score": 50.0,
+      "composite_score": 77.3,
+      "rank": 14,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (11.0x), PB (0.8x), Div Yield 373.0%"
+    },
+    {
+      "symbol": "MAHABANK",
+      "pe": 8.541667,
+      "pb": 1.7927829,
+      "market_cap_cr": 59917.2,
+      "dividend_yield": 323.0,
+      "roe": 22.659999,
+      "debt_equity": NaN,
+      "current_price": 77.9,
+      "sector": "Financial Services",
+      "industry": "Banks - Regional",
+      "warnings": [],
+      "is_psu": true,
+      "psu_boost": 10.0,
+      "value_score": 71.4,
+      "quality_score": 66.1,
+      "analyst_score": 50.0,
+      "composite_score": 75.5,
+      "rank": 15,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "PSU bank Low PE (8.5x), PB (1.8x), ROE 22.7%, Div Yield 323.0%"
+    },
+    {
+      "symbol": "GICHSGFIN",
+      "pe": 5.9834123,
+      "pb": 0.4083151,
+      "market_cap_cr": 815.8,
+      "dividend_yield": 291.0,
+      "roe": 0.0,
+      "debt_equity": 451.51,
+      "current_price": 151.5,
+      "sector": "Financial Services",
+      "industry": "Mortgage Finance",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 451.5 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 93.1,
+      "quality_score": 60.8,
+      "analyst_score": 50.0,
+      "composite_score": 74.8,
+      "rank": 16,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (6.0x), PB (0.4x), Div Yield 291.0%"
+    },
+    {
+      "symbol": "COALINDIA",
+      "pe": 9.413708,
+      "pb": 2.6654665,
+      "market_cap_cr": 281020.4,
+      "dividend_yield": 488.0,
+      "roe": 0.0,
+      "debt_equity": 12.976,
+      "current_price": 456.0,
+      "sector": "Energy",
+      "industry": "Thermal Coal",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 13.0 (> 1.0)"
+      ],
+      "is_psu": true,
+      "psu_boost": 10.0,
+      "value_score": 61.0,
+      "quality_score": 80.3,
+      "analyst_score": 50.0,
+      "composite_score": 74.6,
+      "rank": 17,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "PSU Low PE (9.4x), PB (2.7x), Div Yield 488.0%"
+    },
+    {
+      "symbol": "JPOLYINVST",
+      "pe": 1.2747868,
+      "pb": 0.6924053,
+      "market_cap_cr": 1133.3,
+      "dividend_yield": 0.0,
+      "roe": 0.0,
+      "debt_equity": 1.433,
+      "current_price": 1078.1,
+      "sector": "Financial Services",
+      "industry": "Asset Management",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 1.4 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 73.6,
+      "quality_score": 88.3,
+      "analyst_score": 50.0,
+      "composite_score": 73.3,
+      "rank": 18,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (1.3x), PB (0.7x)"
+    },
+    {
+      "symbol": "GHCL",
+      "pe": 9.31673,
+      "pb": 1.3033303,
+      "market_cap_cr": 4556.7,
+      "dividend_yield": 239.0,
+      "roe": 0.0,
+      "debt_equity": 2.663,
+      "current_price": 495.65,
+      "sector": "Basic Materials",
+      "industry": "Chemicals",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 2.7 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 72.3,
+      "quality_score": 86.3,
+      "analyst_score": 50.0,
+      "composite_score": 72.0,
+      "rank": 19,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (9.3x), PB (1.3x), Div Yield 239.0%"
+    },
+    {
+      "symbol": "MAGADSUGAR",
+      "pe": 8.423541,
+      "pb": 0.9026873,
+      "market_cap_cr": 728.1,
+      "dividend_yield": 237.0,
+      "roe": 0.0,
+      "debt_equity": 40.692,
+      "current_price": 516.7,
+      "sector": "Consumer Defensive",
+      "industry": "Confectioners",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 40.7 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 80.9,
+      "quality_score": 71.1,
+      "analyst_score": 50.0,
+      "composite_score": 71.8,
+      "rank": 20,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (8.4x), PB (0.9x), Div Yield 237.0%"
+    },
+    {
+      "symbol": "MANALIPETC",
+      "pe": 8.158706,
+      "pb": 0.7941984,
+      "market_cap_cr": 910.7,
+      "dividend_yield": 92.0,
+      "roe": 0.0,
+      "debt_equity": 13.6,
+      "current_price": 52.95,
+      "sector": "Basic Materials",
+      "industry": "Specialty Chemicals",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 13.6 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 75.4,
+      "quality_score": 79.9,
+      "analyst_score": 50.0,
+      "composite_score": 71.7,
+      "rank": 21,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (8.2x), PB (0.8x), Div Yield 92.0%"
+    },
+    {
+      "symbol": "DEN",
+      "pe": 7.9856324,
+      "pb": 0.3480799,
+      "market_cap_cr": 1324.9,
+      "dividend_yield": 0.0,
+      "roe": 4.425,
+      "debt_equity": 0.524,
+      "current_price": 27.79,
+      "sector": "Communication Services",
+      "industry": "Entertainment",
+      "warnings": [
+        "Low ROE: 4.4% (< 12%)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 69.1,
+      "quality_score": 90.3,
+      "analyst_score": 50.0,
+      "composite_score": 71.6,
+      "rank": 22,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (8.0x), PB (0.3x), ROE 4.4%"
+    },
+    {
+      "symbol": "DALMIASUG",
+      "pe": 8.675018,
+      "pb": 0.94777393,
+      "market_cap_cr": 3055.1,
+      "dividend_yield": 150.0,
+      "roe": 0.0,
+      "debt_equity": 16.971,
+      "current_price": 377.45,
+      "sector": "Consumer Defensive",
+      "industry": "Confectioners",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 17.0 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 75.5,
+      "quality_score": 79.1,
+      "analyst_score": 50.0,
+      "composite_score": 71.5,
+      "rank": 23,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (8.7x), PB (0.9x), Div Yield 150.0%"
+    },
+    {
+      "symbol": "INDIANB",
+      "pe": 10.647087,
+      "pb": 1.5337573,
+      "market_cap_cr": 122560.2,
+      "dividend_yield": 178.0,
+      "roe": 15.751999999999999,
+      "debt_equity": NaN,
+      "current_price": 909.9,
+      "sector": "Financial Services",
+      "industry": "Banks - Regional",
+      "warnings": [],
+      "is_psu": true,
+      "psu_boost": 10.0,
+      "value_score": 64.3,
+      "quality_score": 64.3,
+      "analyst_score": 50.0,
+      "composite_score": 71.4,
+      "rank": 24,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "PSU bank Low PE (10.6x), PB (1.5x), ROE 15.8%, Div Yield 178.0%"
+    },
+    {
+      "symbol": "LICHSGFIN",
+      "pe": 5.4221396,
+      "pb": 0.77223194,
+      "market_cap_cr": 29744.7,
+      "dividend_yield": 183.0,
+      "roe": 0.0,
+      "debt_equity": 679.251,
+      "current_price": 540.75,
+      "sector": "Financial Services",
+      "industry": "Mortgage Finance",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 679.3 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 86.7,
+      "quality_score": 60.0,
+      "analyst_score": 50.0,
+      "composite_score": 71.4,
+      "rank": 25,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (5.4x), PB (0.8x), Div Yield 183.0%"
+    },
+    {
+      "symbol": "INDSWFTLAB",
+      "pe": 3.983763,
+      "pb": 0.8396582,
+      "market_cap_cr": 1193.1,
+      "dividend_yield": 0.0,
+      "roe": 0.0,
+      "debt_equity": 1.687,
+      "current_price": 137.4,
+      "sector": "Healthcare",
+      "industry": "Drug Manufacturers - Specialty & Generic",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 1.7 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 70.3,
+      "quality_score": 87.3,
+      "analyst_score": 50.0,
+      "composite_score": 71.3,
+      "rank": 26,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (4.0x), PB (0.8x)"
+    },
+    {
+      "symbol": "CENTENKA",
+      "pe": 13.505766,
+      "pb": 0.6415972,
+      "market_cap_cr": 921.3,
+      "dividend_yield": 231.0,
+      "roe": 0.0,
+      "debt_equity": 2.535,
+      "current_price": 421.65,
+      "sector": "Consumer Cyclical",
+      "industry": "Textile Manufacturing",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 2.5 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 70.7,
+      "quality_score": 86.5,
+      "analyst_score": 50.0,
+      "composite_score": 71.3,
+      "rank": 27,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (13.5x), PB (0.6x), Div Yield 231.0%"
+    },
+    {
+      "symbol": "GESHIP",
+      "pe": 8.8813,
+      "pb": 1.317105,
+      "market_cap_cr": 20050.2,
+      "dividend_yield": 204.0,
+      "roe": 0.0,
+      "debt_equity": 8.236,
+      "current_price": 1404.4,
+      "sector": "Industrials",
+      "industry": "Marine Shipping",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 8.2 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 71.2,
+      "quality_score": 83.3,
+      "analyst_score": 50.0,
+      "composite_score": 70.6,
+      "rank": 28,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (8.9x), PB (1.3x), Div Yield 204.0%"
+    },
+    {
+      "symbol": "HINDPETRO",
+      "pe": 5.1616917,
+      "pb": 1.3968048,
+      "market_cap_cr": 79474.2,
+      "dividend_yield": 411.00000000000006,
+      "roe": 0.0,
+      "debt_equity": 110.909,
+      "current_price": 373.5,
+      "sector": "Energy",
+      "industry": "Oil & Gas Refining & Marketing",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 110.9 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 82.3,
+      "quality_score": 64.6,
+      "analyst_score": 50.0,
+      "composite_score": 70.5,
+      "rank": 29,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (5.2x), PB (1.4x), Div Yield 411.0%"
+    },
+    {
+      "symbol": "MAHSEAMLES",
+      "pe": 10.236653,
+      "pb": 1.3110975,
+      "market_cap_cr": 8607.4,
+      "dividend_yield": 153.0,
+      "roe": 0.0,
+      "debt_equity": 0.151,
+      "current_price": 642.35,
+      "sector": "Basic Materials",
+      "industry": "Steel",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 65.9,
+      "quality_score": 90.8,
+      "analyst_score": 50.0,
+      "composite_score": 70.2,
+      "rank": 30,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (10.2x), PB (1.3x), Div Yield 153.0%"
+    },
+    {
+      "symbol": "KAMDHENU",
+      "pe": 7.8561153,
+      "pb": 1.6735632,
+      "market_cap_cr": 615.6,
+      "dividend_yield": 112.00000000000001,
+      "roe": 0.0,
+      "debt_equity": 0.156,
+      "current_price": 21.84,
+      "sector": "Basic Materials",
+      "industry": "Steel",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 65.1,
+      "quality_score": 90.6,
+      "analyst_score": 50.0,
+      "composite_score": 69.7,
+      "rank": 31,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (7.9x), PB (1.7x), Div Yield 112.0%"
+    },
+    {
+      "symbol": "JINDRILL",
+      "pe": 6.579785,
+      "pb": 0.86846834,
+      "market_cap_cr": 1558.3,
+      "dividend_yield": 18.0,
+      "roe": 0.0,
+      "debt_equity": 6.544,
+      "current_price": 537.7,
+      "sector": "Energy",
+      "industry": "Oil & Gas Equipment & Services",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 6.5 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 68.9,
+      "quality_score": 83.7,
+      "analyst_score": 50.0,
+      "composite_score": 69.6,
+      "rank": 32,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (6.6x), PB (0.9x), Div Yield 18.0%"
+    },
+    {
+      "symbol": "CSLFINANCE",
+      "pe": 6.110992,
+      "pb": 0.89449626,
+      "market_cap_cr": 512.6,
+      "dividend_yield": 128.0,
+      "roe": 0.0,
+      "debt_equity": 137.222,
+      "current_price": 227.94,
+      "sector": "Financial Services",
+      "industry": "Credit Services",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 137.2 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 80.8,
+      "quality_score": 63.8,
+      "analyst_score": 50.0,
+      "composite_score": 69.5,
+      "rank": 33,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (6.1x), PB (0.9x), Div Yield 128.0%"
+    },
+    {
+      "symbol": "CHAMBLFERT",
+      "pe": 9.225617,
+      "pb": 1.7953438,
+      "market_cap_cr": 17660.8,
+      "dividend_yield": 224.00000000000003,
+      "roe": 0.0,
+      "debt_equity": 1.022,
+      "current_price": 440.8,
+      "sector": "Basic Materials",
+      "industry": "Agricultural Inputs",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 1.0 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 65.5,
+      "quality_score": 89.1,
+      "analyst_score": 50.0,
+      "composite_score": 69.5,
+      "rank": 34,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (9.2x), PB (1.8x), Div Yield 224.0%"
+    },
+    {
+      "symbol": "KTKBANK",
+      "pe": 7.9357376,
+      "pb": 0.7271897,
+      "market_cap_cr": 9153.5,
+      "dividend_yield": 204.0,
+      "roe": 0.0,
+      "debt_equity": NaN,
+      "current_price": 242.04,
+      "sector": "Financial Services",
+      "industry": "Banks - Regional",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 83.1,
+      "quality_score": 59.2,
+      "analyst_score": 50.0,
+      "composite_score": 69.3,
+      "rank": 35,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (7.9x), PB (0.7x), Div Yield 204.0%"
+    },
+    {
+      "symbol": "J&KBANK",
+      "pe": 6.4409814,
+      "pb": 0.9769198,
+      "market_cap_cr": 13880.4,
+      "dividend_yield": 168.0,
+      "roe": 14.635000000000002,
+      "debt_equity": NaN,
+      "current_price": 126.05,
+      "sector": "Financial Services",
+      "industry": "Banks - Regional",
+      "warnings": [],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 80.8,
+      "quality_score": 63.1,
+      "analyst_score": 50.0,
+      "composite_score": 69.3,
+      "rank": 36,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (6.4x), PB (1.0x), ROE 14.6%, Div Yield 168.0%"
+    },
+    {
+      "symbol": "CHEVIOT",
+      "pe": 9.051774,
+      "pb": 0.90681237,
+      "market_cap_cr": 633.2,
+      "dividend_yield": 46.0,
+      "roe": 0.0,
+      "debt_equity": 1.473,
+      "current_price": 1083.95,
+      "sector": "Consumer Cyclical",
+      "industry": "Textile Manufacturing",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 1.5 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 65.0,
+      "quality_score": 87.9,
+      "analyst_score": 50.0,
+      "composite_score": 68.9,
+      "rank": 37,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (9.1x), PB (0.9x), Div Yield 46.0%"
+    },
+    {
+      "symbol": "KUANTUM",
+      "pe": 13.045528,
+      "pb": 0.58238125,
+      "market_cap_cr": 700.1,
+      "dividend_yield": 372.0,
+      "roe": 0.0,
+      "debt_equity": 56.267,
+      "current_price": 80.23,
+      "sector": "Basic Materials",
+      "industry": "Paper & Paper Products",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 56.3 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 76.6,
+      "quality_score": 68.8,
+      "analyst_score": 50.0,
+      "composite_score": 68.9,
+      "rank": 38,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (13.0x), PB (0.6x), Div Yield 372.0%"
+    },
+    {
+      "symbol": "KIRIINDUS",
+      "pe": 0.49376982,
+      "pb": 0.6830608,
+      "market_cap_cr": 2597.9,
+      "dividend_yield": 0.0,
+      "roe": 0.0,
+      "debt_equity": 37.3,
+      "current_price": 398.65,
+      "sector": "Basic Materials",
+      "industry": "Specialty Chemicals",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 37.3 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 74.0,
+      "quality_score": 72.3,
+      "analyst_score": 50.0,
+      "composite_score": 68.7,
+      "rank": 39,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (0.5x), PB (0.7x)"
+    },
+    {
+      "symbol": "BALMLAWRIE",
+      "pe": 11.5489435,
+      "pb": 1.5868871,
+      "market_cap_cr": 3086.8,
+      "dividend_yield": 710.0,
+      "roe": 0.0,
+      "debt_equity": 12.098,
+      "current_price": 180.51,
+      "sector": "Industrials",
+      "industry": "Conglomerates",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 12.1 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 68.8,
+      "quality_score": 81.1,
+      "analyst_score": 50.0,
+      "composite_score": 68.7,
+      "rank": 40,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (11.5x), PB (1.6x), Div Yield 710.0%"
+    },
+    {
+      "symbol": "EXPLEOSOL",
+      "pe": 11.725018,
+      "pb": 1.772639,
+      "market_cap_cr": 1247.4,
+      "dividend_yield": 567.0,
+      "roe": 0.0,
+      "debt_equity": 2.866,
+      "current_price": 803.75,
+      "sector": "Technology",
+      "industry": "Information Technology Services",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 2.9 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 65.2,
+      "quality_score": 85.9,
+      "analyst_score": 50.0,
+      "composite_score": 68.4,
+      "rank": 41,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (11.7x), PB (1.8x), Div Yield 567.0%"
+    },
+    {
+      "symbol": "IDBI",
+      "pe": 8.815971,
+      "pb": 1.1745566,
+      "market_cap_cr": 81901.0,
+      "dividend_yield": 285.0,
+      "roe": 14.728,
+      "debt_equity": NaN,
+      "current_price": 76.17,
+      "sector": "Financial Services",
+      "industry": "Banks - Regional",
+      "warnings": [],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 77.7,
+      "quality_score": 63.4,
+      "analyst_score": 50.0,
+      "composite_score": 67.9,
+      "rank": 42,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (8.8x), PB (1.2x), ROE 14.7%, Div Yield 285.0%"
+    },
+    {
+      "symbol": "JUSTDIAL",
+      "pe": 9.021554,
+      "pb": 0.878236,
+      "market_cap_cr": 4485.3,
+      "dividend_yield": 0.0,
+      "roe": 10.2340005,
+      "debt_equity": 1.655,
+      "current_price": 527.4,
+      "sector": "Communication Services",
+      "industry": "Internet Content & Information",
+      "warnings": [
+        "Low ROE: 10.2% (< 12%)",
+        "High Debt/Equity: 1.7 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 61.7,
+      "quality_score": 89.3,
+      "analyst_score": 50.0,
+      "composite_score": 67.6,
+      "rank": 43,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (9.0x), PB (0.9x), ROE 10.2%"
+    },
+    {
+      "symbol": "INDIANHUME",
+      "pe": 2.7562518,
+      "pb": 1.21418,
+      "market_cap_cr": 1701.4,
+      "dividend_yield": 54.0,
+      "roe": 0.0,
+      "debt_equity": 35.77,
+      "current_price": 322.95,
+      "sector": "Industrials",
+      "industry": "Engineering & Construction",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 35.8 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 70.7,
+      "quality_score": 72.9,
+      "analyst_score": 50.0,
+      "composite_score": 67.2,
+      "rank": 44,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (2.8x), PB (1.2x), Div Yield 54.0%"
+    },
+    {
+      "symbol": "HUHTAMAKI",
+      "pe": 11.318008,
+      "pb": 1.0327648,
+      "market_cap_cr": 1338.6,
+      "dividend_yield": 108.0,
+      "roe": 9.5019996,
+      "debt_equity": 11.138,
+      "current_price": 177.24,
+      "sector": "Consumer Cyclical",
+      "industry": "Packaging & Containers",
+      "warnings": [
+        "Low ROE: 9.5% (< 12%)",
+        "High Debt/Equity: 11.1 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 64.7,
+      "quality_score": 82.4,
+      "analyst_score": 50.0,
+      "composite_score": 67.1,
+      "rank": 45,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (11.3x), PB (1.0x), ROE 9.5%, Div Yield 108.0%"
+    },
+    {
+      "symbol": "CAPITALSFB",
+      "pe": 8.675268,
+      "pb": 0.82014316,
+      "market_cap_cr": 1175.8,
+      "dividend_yield": 155.0,
+      "roe": 9.9259995,
+      "debt_equity": NaN,
+      "current_price": 258.87,
+      "sector": "Financial Services",
+      "industry": "Banks - Regional",
+      "warnings": [
+        "Low ROE: 9.9% (< 12%)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 78.0,
+      "quality_score": 60.4,
+      "analyst_score": 50.0,
+      "composite_score": 67.1,
+      "rank": 46,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (8.7x), PB (0.8x), ROE 9.9%, Div Yield 155.0%"
+    },
+    {
+      "symbol": "DBCORP",
+      "pe": 11.933556,
+      "pb": 1.6682148,
+      "market_cap_cr": 3841.6,
+      "dividend_yield": 322.0,
+      "roe": 0.0,
+      "debt_equity": 12.612,
+      "current_price": 215.52,
+      "sector": "Communication Services",
+      "industry": "Publishing",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 12.6 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 64.9,
+      "quality_score": 80.9,
+      "analyst_score": 50.0,
+      "composite_score": 66.7,
+      "rank": 47,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (11.9x), PB (1.7x), Div Yield 322.0%"
+    },
+    {
+      "symbol": "EXCELINDUS",
+      "pe": 15.3857,
+      "pb": 0.64514446,
+      "market_cap_cr": 1165.9,
+      "dividend_yield": 144.0,
+      "roe": 0.0,
+      "debt_equity": 0.621,
+      "current_price": 927.45,
+      "sector": "Basic Materials",
+      "industry": "Specialty Chemicals",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 59.5,
+      "quality_score": 89.9,
+      "analyst_score": 50.0,
+      "composite_score": 66.7,
+      "rank": 48,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (15.4x), PB (0.6x), Div Yield 144.0%"
+    },
+    {
+      "symbol": "KNRCON",
+      "pe": 7.0574512,
+      "pb": 0.6966564,
+      "market_cap_cr": 3316.6,
+      "dividend_yield": 20.0,
+      "roe": 0.0,
+      "debt_equity": 48.727,
+      "current_price": 117.93,
+      "sector": "Industrials",
+      "industry": "Engineering & Construction",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 48.7 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 71.2,
+      "quality_score": 69.8,
+      "analyst_score": 50.0,
+      "composite_score": 66.5,
+      "rank": 49,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (7.1x), PB (0.7x), Div Yield 20.0%"
+    },
+    {
+      "symbol": "ASHOKA",
+      "pe": 1.3155034,
+      "pb": 0.88730764,
+      "market_cap_cr": 3735.0,
+      "dividend_yield": 0.0,
+      "roe": 0.0,
+      "debt_equity": 44.43,
+      "current_price": 133.05,
+      "sector": "Industrials",
+      "industry": "Engineering & Construction",
+      "warnings": [
+        "Low ROE: 0.0% (< 12%)",
+        "High Debt/Equity: 44.4 (> 1.0)"
+      ],
+      "is_psu": false,
+      "psu_boost": 0.0,
+      "value_score": 70.1,
+      "quality_score": 70.5,
+      "analyst_score": 50.0,
+      "composite_score": 66.2,
+      "rank": 50,
+      "mtf_risk": {
+        "leverage_3x_margin_required_pct": 33.3,
+        "ten_pct_fall_capital_loss_pct": 30.0,
+        "margin_call_distance_pct": 2222.2
+      },
+      "why_picked": "Low PE (1.3x), PB (0.9x)"
+    }
+  ],
+  "exclusion_summary": {
+    "pe_too_high": 657,
+    "pb_too_high": 489,
+    "market_cap_too_small": 1298,
+    "missing_data": 2168,
+    "negative_pe": 0
+  },
+  "psu_stocks_count": 11
 }
