@@ -1,0 +1,30 @@
+{
+  "name": "nifty-timing-index-website",
+  "type": "module",
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^6.0",
+    "@astrojs/react": "^4.0",
+    "@astrojs/sitemap": "^3.0",
+    "react": "^18.3",
+    "react-dom": "^18.3",
+    "chart.js": "^4.4",
+    "react-chartjs-2": "^5.2",
+    "firebase": "^11.0",
+    "tailwindcss": "^4.0",
+    "@tailwindcss/vite": "^4.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3",
+    "@types/react-dom": "^18.3",
+    "typescript": "^5.6"
+  }
+}

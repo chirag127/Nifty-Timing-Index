@@ -1,0 +1,40 @@
+name: NTI Post-Market Screener
+
+on:
+  schedule:
+    - cron: "15 10 * * 1-5"  # 3:45 PM IST = 10:15 UTC, Mon–Fri only
+  workflow_dispatch:
+
+jobs:
+  screener:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Setup Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run post-market screener
+        env:
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+        run: uv run python -m nti.pipelines.screener_run --type post_market
+
+      - name: Commit screener results
+        run: |
+          git config --local user.email "nti-bot@github.com"
+          git config --local user.name "NTI Bot"
+          git add data/screener/
+          git diff-index --quiet HEAD || git commit -m "Post-market screener $(date -u '+%Y-%m-%d')"
+          git push

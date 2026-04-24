@@ -1,0 +1,30 @@
+---
+import BlogPostLayout from "../../layouts/BlogPost.astro";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const blogs = await getCollection("blog");
+  if (!blogs || blogs.length === 0) return [];
+  return blogs.map((blog) => ({
+    params: { slug: blog.data.slug },
+    props: { blog },
+  }));
+}
+
+const { blog } = Astro.props;
+const { Content } = await render(blog);
+---
+
+<BlogPostLayout
+  title={blog.data.title}
+  description={blog.data.description}
+  ntiScore={blog.data.ntiScore}
+  ntiZone={blog.data.ntiZone}
+  ntiZonePrev={blog.data.ntiZonePrev}
+  zoneChanged={blog.data.zoneChanged}
+  confidence={blog.data.confidence}
+  publishedAt={new Date(blog.data.publishedAt)}
+  blogType={blog.data.blogType}
+>
+  <Content />
+</BlogPostLayout>

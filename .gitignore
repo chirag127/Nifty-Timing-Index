@@ -173,9 +173,57 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# Cursor  
-#  Cursor is an AI-powered code editor.`.cursorignore` specifies files/directories to 
+# Cursor
+#  Cursor is an AI-powered code editor.`.cursorignore` specifies files/directories to
 #  exclude from AI features like autocomplete and code analysis. Recommended for sensitive data
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# ============================================================
+# NTI-specific entries
+# ============================================================
+
+# Environment (contains API keys)
+.env
+.env.secrets.tmp
+
+# ML model binaries (large, stored as GitHub Actions artifacts)
+model_artifacts/*.joblib
+model_artifacts/*.pkl
+model_artifacts/*.h5
+!model_artifacts/.gitkeep
+
+# Data files that change hourly (keep structure, ignore content)
+data/indicators/hourly/*.csv
+data/errors/*.json
+
+# Selenium / Chrome driver
+chromedriver
+driver/
+
+# Scraped HTML cache
+*.html.cache
+
+# Blog drafts (temporary)
+*.blog.draft.md
+
+# Website build output
+website/dist/
+website/.astro/
+website/node_modules/
+website/.vercel/
+website/.netlify/
+
+# npm debug
+website/npm-debug.log*
+website/.npm
+
+# TypeScript build info
+website/tsconfig.tsbuildinfo
+
+# OS files
+Thumbs.db
+.DS_Store
+Desktop.ini
+a.py

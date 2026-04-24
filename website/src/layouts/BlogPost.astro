@@ -1,0 +1,362 @@
+---
+import Layout from "./Layout.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  ntiScore: number;
+  ntiZone: string;
+  ntiZonePrev: string;
+  zoneChanged: boolean;
+  confidence: number;
+  publishedAt: Date;
+  blogType: string;
+}
+
+const { title, description, ntiScore, ntiZone, ntiZonePrev, zoneChanged, confidence, publishedAt, blogType } = Astro.props;
+
+function getZoneColor(zone: string): string {
+  const colors: Record<string, string> = {
+    EXTREME_BUY: "#00ff88",
+    STRONG_BUY: "#22c55e",
+    BUY_LEAN: "#4ade80",
+    NEUTRAL: "#60a5fa",
+    SELL_LEAN: "#fb923c",
+    STRONG_SELL: "#ef4444",
+    EXTREME_SELL: "#dc2626",
+  };
+  // Using hex instead of CSS vars for opacity concatenation (e.g. `${color}40`)
+  return colors[zone] || "#64748b";
+}
+
+function getZoneEmoji(zone: string): string {
+  const emojis: Record<string, string> = {
+    EXTREME_BUY: "🟢",
+    STRONG_BUY: "🟢",
+    BUY_LEAN: "🟢",
+    NEUTRAL: "🔵",
+    SELL_LEAN: "🟠",
+    STRONG_SELL: "🔴",
+    EXTREME_SELL: "🔴",
+  };
+  return emojis[zone] || "⚪";
+}
+
+const zoneColor = getZoneColor(ntiZone);
+---
+
+<Layout title={title} description={description}>
+  <article class="blog-post animate-fade-in-up">
+    {zoneChanged && (
+      <div class="zone-change-banner" style={`--zone-color: ${zoneColor}; border-color: ${zoneColor}40`}>
+        <div class="zone-banner-dot" style={`background: ${zoneColor}`}></div>
+        <div class="zone-banner-content">
+          <strong>ZONE CHANGE ALERT</strong>
+          <span class="zone-transition mono">
+            {ntiZonePrev.replace(/_/g, " ")} → {ntiZone.replace(/_/g, " ")}
+          </span>
+        </div>
+      </div>
+    )}
+
+    <header class="blog-header">
+      <div class="blog-meta">
+        <time datetime={publishedAt.toISOString()}>
+          {publishedAt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })} IST
+        </time>
+        <span class="badge badge-gold">{blogType.replace(/_/g, " ")}</span>
+      </div>
+      <h1 class="blog-title">{title}</h1>
+      <div class="blog-score-bar">
+        <div class="score-display" style={`color: ${zoneColor}`}>
+          <span class="score-value mono">{ntiScore}</span>
+          <span class="score-zone">{ntiZone.replace(/_/g, " ")}</span>
+        </div>
+        <div class="confidence-bar">
+          <span class="confidence-label">Confidence</span>
+          <div class="confidence-track">
+            <div class="confidence-fill" style={`width: ${confidence}%; background: ${confidence >= 80 ? "var(--color-emerald)" : confidence >= 60 ? "var(--color-gold)" : "var(--color-crimson)"}`}></div>
+          </div>
+          <span class="mono confidence-pct">{confidence}%</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="blog-content">
+      <slot />
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .blog-post {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  .zone-change-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 1.15rem;
+    margin-bottom: 1.5rem;
+    background: var(--color-bg-card);
+    border: 2px solid;
+    border-radius: var(--radius-lg);
+    animation: pulse-glow 2.5s ease-in-out infinite;
+  }
+
+  .zone-banner-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 8px currentColor;
+  }
+
+  .zone-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--color-text-primary);
+  }
+
+  .zone-banner-content strong {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+  }
+
+  .zone-transition {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+  }
+
+  .blog-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.75rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .blog-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+  }
+
+  .blog-title {
+    font-family: var(--font-display);
+    font-size: 1.85rem;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .blog-score-bar {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .score-display {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .score-value {
+    font-size: 2.25rem;
+    font-weight: 800;
+  }
+
+  .score-zone {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .confidence-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .confidence-label {
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .confidence-track {
+    flex: 1;
+    height: 6px;
+    background: var(--color-bg-elevated);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .confidence-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width var(--transition-slow);
+  }
+
+  .confidence-pct {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+  }
+
+  .blog-content {
+    line-height: 1.85;
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+  }
+
+  .blog-content :global(h2) {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 2.5rem 0 1rem;
+    color: var(--color-gold);
+  }
+
+  .blog-content :global(h3) {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 1.75rem 0 0.75rem;
+    color: var(--color-text-primary);
+  }
+
+  .blog-content :global(p) {
+    margin-bottom: 1rem;
+  }
+
+  .blog-content :global(ul), .blog-content :global(ol) {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+  }
+
+  .blog-content :global(li) {
+    margin-bottom: 0.35rem;
+  }
+
+  .blog-content :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+    font-size: 0.875rem;
+  }
+
+  .blog-content :global(th),
+  .blog-content :global(td) {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border-subtle);
+    text-align: left;
+  }
+
+  .blog-content :global(th) {
+    background: var(--color-bg-elevated);
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .blog-content :global(strong) {
+    color: var(--color-gold-bright);
+  }
+
+  .blog-content :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--color-bg-elevated);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+  }
+
+  .blog-content :global(blockquote) {
+    border-left: 3px solid var(--color-gold);
+    padding-left: 1.25rem;
+    margin: 1.25rem 0;
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+
+  .blog-content :global(a) {
+    color: var(--color-gold-bright);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .blog-content :global(hr) {
+    border: none;
+    height: 1px;
+    background: var(--color-border-subtle);
+    margin: 2rem 0;
+  }
+
+  /* ---- Light Theme ---- */
+  [data-theme="light"] .zone-change-banner {
+    background: var(--color-bg-sunken);
+  }
+
+  [data-theme="light"] .confidence-track {
+    background: var(--color-border-subtle);
+  }
+
+  [data-theme="light"] .blog-content :global(strong) {
+    color: var(--color-gold);
+  }
+
+  [data-theme="light"] .blog-content :global(code) {
+    background: var(--color-bg-sunken);
+  }
+
+  [data-theme="light"] .blog-content :global(th) {
+    background: var(--color-bg-sunken);
+  }
+
+  [data-theme="light"] .blog-content :global(blockquote) {
+    border-left-color: var(--color-gold);
+    background: var(--color-bg-sunken);
+    padding: 0.75rem 1.25rem;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 768px) {
+    .blog-title { font-size: 1.5rem; }
+    .score-value { font-size: 1.75rem; }
+    .blog-score-bar { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .confidence-bar { min-width: 0; width: 100%; }
+    .zone-change-banner { padding: 0.75rem 1rem; }
+    .zone-banner-content { flex-wrap: wrap; gap: 0.5rem; }
+    .blog-header { margin-bottom: 2rem; padding-bottom: 1.5rem; }
+    .blog-content { font-size: 0.95rem; }
+  }
+
+  /* ---- Small ---- */
+  @media (max-width: 480px) {
+    .blog-title { font-size: 1.25rem; }
+    .score-value { font-size: 1.5rem; }
+    .score-zone { font-size: 0.75rem; }
+    .zone-change-banner { padding: 0.65rem 0.85rem; gap: 0.65rem; }
+    .zone-banner-content { font-size: 0.78rem; }
+    .zone-banner-content strong { font-size: 0.62rem; }
+    .zone-transition { font-size: 0.72rem; }
+    .blog-meta { font-size: 0.78rem; gap: 0.5rem; }
+    .confidence-label { font-size: 0.65rem; }
+    .confidence-pct { font-size: 0.72rem; }
+    .blog-content { font-size: 0.9rem; line-height: 1.75; }
+    .blog-content :global(h2) { font-size: 1.15rem; }
+    .blog-content :global(h3) { font-size: 1rem; }
+  }
+</style>

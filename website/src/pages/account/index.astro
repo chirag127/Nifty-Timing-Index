@@ -1,0 +1,306 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="My Account — NTI" description="Manage your NTI watchlist, alert preferences, and custom thresholds">
+  <div class="account-page">
+    <header class="animate-fade-in-up">
+      <h1>My Account</h1>
+      <p>Save watchlists, alert preferences, and custom screener thresholds</p>
+    </header>
+
+    <!-- Login Section -->
+    <div class="auth-section card animate-stagger-in stagger-1" id="auth-section">
+      <div class="login-prompt" id="login-prompt">
+        <div class="login-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h2>Sign in with Google</h2>
+        <p>Save your preferences, watchlists, and alert settings across devices.</p>
+        <button class="google-login-btn" id="google-login-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Sign in with Google
+        </button>
+        <p class="auth-note">Your data is stored securely in Firebase Firestore. We only store preferences you explicitly set.</p>
+      </div>
+
+      <div class="user-info" id="user-info" style="display:none">
+        <div class="user-avatar" id="user-avatar"></div>
+        <div class="user-details">
+          <span class="user-name" id="user-name">—</span>
+          <span class="user-email" id="user-email">—</span>
+        </div>
+        <button class="signout-btn" id="signout-btn">Sign out</button>
+      </div>
+    </div>
+
+    <!-- Preferences -->
+    <div class="preferences-section" id="preferences-section" style="display:none">
+      <div class="card">
+        <h2 class="section-title">Alert Preferences</h2>
+        <div class="pref-row">
+          <label>Email alerts on zone change</label>
+          <input type="checkbox" id="pref-zone-alert" checked />
+        </div>
+        <div class="pref-row">
+          <label>Email alerts on big moves (>10 pts)</label>
+          <input type="checkbox" id="pref-big-move-alert" />
+        </div>
+        <div class="pref-row">
+          <label>Alert email address</label>
+          <input type="email" id="pref-alert-email" placeholder="your@email.com" />
+        </div>
+        <button class="save-btn" id="save-prefs-btn">Save Preferences</button>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Custom Screener Thresholds</h2>
+        <p class="pref-hint">Override default PE/PB/market cap limits for your personal screener view</p>
+        <div class="pref-row">
+          <label>Max P/E Ratio</label>
+          <input type="number" id="pref-max-pe" value="20" min="5" max="100" step="0.5" />
+        </div>
+        <div class="pref-row">
+          <label>Max P/B Ratio</label>
+          <input type="number" id="pref-max-pb" value="3" min="0.5" max="20" step="0.1" />
+        </div>
+        <div class="pref-row">
+          <label>Min Market Cap (₹ Cr)</label>
+          <input type="number" id="pref-min-mcap" value="500" min="100" step="100" />
+        </div>
+        <div class="pref-row">
+          <label>Show PSU stocks only</label>
+          <input type="checkbox" id="pref-psu-only" />
+        </div>
+        <button class="save-btn" id="save-thresholds-btn">Save Thresholds</button>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Theme</h2>
+        <div class="pref-row">
+          <label>Dark mode</label>
+          <input type="checkbox" id="pref-dark-mode" checked />
+        </div>
+      </div>
+    </div>
+
+    <!-- Watchlist -->
+    <div class="watchlist-section" id="watchlist-section" style="display:none">
+      <div class="card">
+        <h2 class="section-title">My Watchlist</h2>
+        <div class="watchlist-empty" id="watchlist-empty">
+          <p>No stocks in your watchlist yet.</p>
+          <p class="hint">Browse the <a href="/screener">Screener</a> and click ⭐ to add stocks.</p>
+        </div>
+        <div class="watchlist-grid" id="watchlist-grid"></div>
+      </div>
+    </div>
+
+    <!-- Alert History -->
+    <div class="alert-history-section" id="alert-history-section" style="display:none">
+      <div class="card">
+        <h2 class="section-title">Alert History</h2>
+        <div id="alert-history-list" class="alert-list">
+          <p class="empty-hint">No alerts triggered yet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .account-page header { margin-bottom: 2.5rem; }
+  .account-page h1 {
+    font-family: var(--font-display);
+    font-size: 1.85rem; font-weight: 800; color: var(--color-gold);
+    letter-spacing: -0.01em;
+  }
+  .account-page p { color: var(--color-text-muted); margin-top: 0.5rem; }
+
+  .auth-section {
+    text-align: center;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .login-icon { color: var(--color-text-muted); opacity: 0.4; margin-bottom: 1rem; }
+  .login-prompt h2 { font-family: var(--font-display); font-size: 1.25rem; color: var(--color-text-primary); margin-bottom: 0.75rem; }
+
+  .google-login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+  .google-login-btn:hover { box-shadow: var(--shadow-elevated); transform: translateY(-1px); border-color: var(--color-border-active); }
+
+  .auth-note { font-size: 0.72rem; color: var(--color-text-muted); margin-top: 1rem; }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+  }
+  .user-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--color-gold);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: var(--color-bg-primary);
+  }
+  .user-name { display: block; font-weight: 600; color: var(--color-text-primary); }
+  .user-email { display: block; font-size: 0.8rem; color: var(--color-text-muted); }
+  .signout-btn {
+    padding: 0.4rem 1rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-family: var(--font-body);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all var(--transition-fast);
+  }
+  .signout-btn:hover { border-color: var(--color-crimson); color: var(--color-crimson); }
+
+  .preferences-section { margin-bottom: 2rem; }
+  .preferences-section .card { margin-bottom: 1rem; padding: 1.5rem; }
+  .pref-hint { font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 1rem; }
+
+  .pref-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+  .pref-row label { font-size: 0.88rem; color: var(--color-text-secondary); }
+  .pref-row input[type="number"] {
+    width: 100px;
+    padding: 0.4rem;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+    text-align: right;
+    font-size: 0.85rem;
+  }
+  .pref-row input[type="email"] {
+    width: 250px;
+    padding: 0.4rem 0.6rem;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-primary);
+    font-size: 0.85rem;
+  }
+  .pref-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--color-gold); }
+
+  .save-btn {
+    margin-top: 1rem;
+    padding: 0.55rem 1.35rem;
+    background: var(--color-gold);
+    color: var(--color-bg-primary);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+  .save-btn:hover { background: var(--color-gold-bright); }
+
+  .watchlist-section, .alert-history-section { margin-bottom: 2rem; }
+  .watchlist-section .card, .alert-history-section .card { padding: 1.5rem; }
+  .hint { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.5rem; }
+  .hint a { color: var(--color-gold); }
+  .empty-hint { color: var(--color-text-muted); font-size: 0.88rem; }
+
+  /* ---- Light Theme ---- */
+  [data-theme="light"] .google-login-btn {
+    background: var(--color-bg-sunken);
+    border-color: var(--color-border);
+  }
+  [data-theme="light"] .google-login-btn:hover {
+    background: var(--color-bg-elevated);
+    box-shadow: var(--shadow-card);
+  }
+
+  [data-theme="light"] .pref-row input[type="number"],
+  [data-theme="light"] .pref-row input[type="email"] {
+    background: var(--color-bg-sunken);
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 768px) {
+    .account-page header { margin-bottom: 1.75rem; }
+    .auth-section { padding: 2rem 1.5rem; }
+    .user-info { flex-wrap: wrap; justify-content: center; }
+    .pref-row input[type="email"] { width: 200px; }
+    .preferences-section .card { padding: 1.25rem; }
+  }
+
+  /* ---- Small ---- */
+  @media (max-width: 480px) {
+    .auth-section { padding: 1.5rem 1rem; }
+    .login-icon svg { width: 24px; height: 24px; }
+    .login-prompt h2 { font-size: 1.1rem; }
+    .google-login-btn { padding: 0.65rem 1.15rem; font-size: 0.85rem; }
+    .pref-row { flex-wrap: wrap; gap: 0.5rem; }
+    .pref-row label { font-size: 0.82rem; width: 100%; }
+    .pref-row input[type="number"] { width: 90px; }
+    .pref-row input[type="email"] { width: 100%; }
+    .pref-row input[type="checkbox"] { width: 16px; height: 16px; }
+    .save-btn { width: 100%; text-align: center; }
+    .preferences-section .card { padding: 1rem; }
+    .signout-btn { padding: 0.35rem 0.85rem; font-size: 0.75rem; }
+  }
+</style>
+
+<script>
+  const loginBtn = document.getElementById("google-login-btn");
+  const loginPrompt = document.getElementById("login-prompt");
+  const userInfo = document.getElementById("user-info");
+  const prefsSection = document.getElementById("preferences-section");
+  const watchlistSection = document.getElementById("watchlist-section");
+  const alertSection = document.getElementById("alert-history-section");
+  const signoutBtn = document.getElementById("signout-btn");
+
+  function showAuthenticated(email: string, name: string) {
+    loginPrompt.style.display = "none";
+    userInfo.style.display = "flex";
+    document.getElementById("user-name")!.textContent = name;
+    document.getElementById("user-email")!.textContent = email;
+    prefsSection.style.display = "block";
+    watchlistSection.style.display = "block";
+    alertSection.style.display = "block";
+  }
+
+  if (loginBtn) {
+    loginBtn.addEventListener("click", () => {
+      alert("Firebase Auth integration requires Firebase config. Set up Firebase via scripts/setup.py first.");
+    });
+  }
+
+  if (signoutBtn) {
+    signoutBtn.addEventListener("click", () => {
+      loginPrompt.style.display = "block";
+      userInfo.style.display = "none";
+      prefsSection.style.display = "none";
+      watchlistSection.style.display = "none";
+      alertSection.style.display = "none";
+    });
+  }
+</script>

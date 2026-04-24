@@ -1,0 +1,432 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+let latestData: any = null;
+try {
+  const res = await fetch(new URL("/api/latest.json", Astro.site));
+  if (res.ok) latestData = await res.json();
+} catch {}
+
+const indicators = latestData?.indicators ?? {};
+---
+
+<Layout title="NTI Indicators — 30-Parameter Breakdown" description="All 30 indicators across 6 tiers used by the Nifty Timing Index model">
+  <div class="indicators-page">
+    <header class="animate-fade-in-up">
+      <h1>Indicator Breakdown</h1>
+      <p>30 parameters across 6 tiers — all normalized 0–100 (0 = buy opportunity, 100 = sell danger)</p>
+    </header>
+
+    <!-- Tier 1: Fundamental Valuation -->
+    <section class="tier-section animate-stagger-in stagger-1">
+      <div class="tier-header tier-1">
+        <div class="tier-icon">1</div>
+        <div>
+          <h2>Fundamental Valuation</h2>
+          <span class="weight">35% weight</span>
+        </div>
+      </div>
+      <div class="indicator-grid">
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Nifty 50 P/E Ratio</div>
+          <div class="ind-value mono">{indicators.nifty_pe ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.nifty_pe_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 10% · Source: NSE</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Nifty 50 P/B Ratio</div>
+          <div class="ind-value mono">{indicators.nifty_pb ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.nifty_pb_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 8% · Source: NSE</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Earnings Yield vs Bond Spread</div>
+          <div class="ind-value mono">{indicators.earnings_yield_bond_spread ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.earnings_yield_bond_spread_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 6% · Source: NSE + FRED</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Nifty Dividend Yield</div>
+          <div class="ind-value mono">{indicators.nifty_dy ?? "—"}%</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.nifty_dy_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 5% · Source: NSE</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Market Cap to GDP</div>
+          <div class="ind-value mono">{indicators.mcap_to_gdp ?? "—"}%</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.mcap_to_gdp_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 4% · Source: NSE + RBI</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Nifty Midcap 150 P/E</div>
+          <div class="ind-value mono">{indicators.midcap_pe ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.midcap_pe_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 2% · Source: NSE</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tier 2: Sentiment -->
+    <section class="tier-section animate-stagger-in stagger-2">
+      <div class="tier-header tier-2">
+        <div class="tier-icon">2</div>
+        <div>
+          <h2>Sentiment (Contrarian)</h2>
+          <span class="weight">25% weight</span>
+        </div>
+      </div>
+      <div class="indicator-grid">
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Tickertape MMI</div>
+          <div class="ind-value mono">{indicators.mmi ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.mmi ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 8% · Source: Selenium</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">India VIX</div>
+          <div class="ind-value mono">{indicators.india_vix ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.vix_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 6% · Source: NSE (contrarian)</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Put/Call Ratio</div>
+          <div class="ind-value mono">{indicators.pcr ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.pcr_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 4% · Source: NSE Options</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Custom F&G Composite</div>
+          <div class="ind-value mono">{indicators.custom_fg_composite ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.custom_fg_composite ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 4% · Computed: VIX+PCR+Breadth+H/L</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">CNN Fear & Greed</div>
+          <div class="ind-value mono">{indicators.cnn_fg_value ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.cnn_fg_value ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 2% · Source: CNN Business</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">FII Net Cash Flow</div>
+          <div class="ind-value mono">₹{indicators.fii_cash_net ?? "—"} Cr</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.fii_cash_5d_avg_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 1% · Source: NSE FII/DII</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tier 3: Macro -->
+    <section class="tier-section animate-stagger-in stagger-3">
+      <div class="tier-header tier-3">
+        <div class="tier-icon">3</div>
+        <div>
+          <h2>Macro Fundamentals</h2>
+          <span class="weight">25% weight</span>
+        </div>
+      </div>
+      <div class="indicator-grid">
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">RBI Repo Rate</div>
+          <div class="ind-value mono">{indicators.rbi_repo_rate ?? "—"}%</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.rbi_rate_direction == 1 ? 20 : indicators.rbi_rate_direction == -1 ? 80 : 50}%`} /></div>
+          <div class="ind-meta">Weight: 6% · Stance: {indicators.rbi_stance ?? "—"}</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">CPI Inflation</div>
+          <div class="ind-value mono">{indicators.cpi_inflation ?? "—"}%</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.cpi_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 5% · Source: MOSPI</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">US 10-Year Yield</div>
+          <div class="ind-value mono">{indicators.us_10y_yield ?? "—"}%</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.us_10y_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 5% · Source: FRED API</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">USD/INR</div>
+          <div class="ind-value mono">₹{indicators.usd_inr ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.usdinr_30d_change_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 4% · Source: yfinance</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Brent Crude</div>
+          <div class="ind-value mono">${indicators.brent_crude ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.crude_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 3% · Source: yfinance</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">S&P 500 Change</div>
+          <div class="ind-value mono">{indicators.sp500_change ?? "—"}%</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: 50%`} /></div>
+          <div class="ind-meta">Weight: 2% · Source: yfinance</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tier 4: Institutional Flow -->
+    <section class="tier-section animate-stagger-in stagger-4">
+      <div class="tier-header tier-4">
+        <div class="tier-icon">4</div>
+        <div>
+          <h2>Institutional Flow</h2>
+          <span class="weight">10% weight</span>
+        </div>
+      </div>
+      <div class="indicator-grid">
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">FII F&O Net Position</div>
+          <div class="ind-value mono">₹{indicators.fii_fo_net ?? "—"} Cr</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.fii_fo_net_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 4% · Source: NSE OI</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">DII Net Cash Flow</div>
+          <div class="ind-value mono">₹{indicators.dii_cash_net ?? "—"} Cr</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.dii_net_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 3% · Source: NSE FII/DII</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">AMFI Monthly SIP Flows</div>
+          <div class="ind-value mono">₹{indicators.sip_flow_monthly_cr ?? "—"} Cr</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: 50%`} /></div>
+          <div class="ind-meta">Weight: 2% · Source: AMFI</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tier 5: LLM News -->
+    <section class="tier-section animate-stagger-in stagger-5">
+      <div class="tier-header tier-5">
+        <div class="tier-icon">5</div>
+        <div>
+          <h2>LLM News Analysis</h2>
+          <span class="weight">5% weight</span>
+        </div>
+      </div>
+      <div class="indicator-grid">
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">News Danger Score</div>
+          <div class="ind-value mono">{indicators.llm_news_danger ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.llm_news_danger ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 2% · Source: RSS → LLM</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Policy/Budget Flag</div>
+          <div class="ind-value mono">{indicators.llm_policy_flag ?? "none"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.llm_policy_flag && indicators.llm_policy_flag !== 'none' ? 70 : 20}%`} /></div>
+          <div class="ind-meta">Weight: 1% · RBI/SEBI/Budget events</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Geopolitical Risk</div>
+          <div class="ind-value mono">{indicators.llm_geopolitical_score ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.llm_geopolitical_score ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 1% · Global risk assessment</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Global Overnight</div>
+          <div class="ind-value mono">{indicators.global_overnight ?? "—"}</div>
+          <div class="ind-bar"><div class="bar-fill" style={`width: ${indicators.global_overnight_normalized ?? 50}%`} /></div>
+          <div class="ind-meta">Weight: 1% · Dow+NASDAQ+Nikkei+HS</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tier 6: Display Only -->
+    <section class="tier-section animate-stagger-in stagger-6">
+      <div class="tier-header tier-6">
+        <div class="tier-icon">6</div>
+        <div>
+          <h2>Display Only</h2>
+          <span class="weight">0% weight · not in model</span>
+        </div>
+      </div>
+      <div class="indicator-grid">
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Nifty RSI (14-day)</div>
+          <div class="ind-value mono">{indicators.rsi_14 ?? "—"}</div>
+          <div class="ind-meta">Overbought/oversold context</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Nifty MACD</div>
+          <div class="ind-value mono">{indicators.macd ?? "—"}</div>
+          <div class="ind-meta">Momentum trend context</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">Advance-Decline Ratio</div>
+          <div class="ind-value mono">{indicators.adv_decline_ratio ?? "—"}</div>
+          <div class="ind-meta">Market breadth context</div>
+        </div>
+        <div class="indicator-card card card-hover">
+          <div class="ind-name">52-Week H/L Ratio</div>
+          <div class="ind-value mono">{indicators.high_low_ratio ?? "—"}</div>
+          <div class="ind-meta">Breadth confirmation</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .indicators-page header { margin-bottom: 2.5rem; }
+  .indicators-page h1 {
+    font-family: var(--font-display);
+    font-size: 1.85rem; font-weight: 800; color: var(--color-gold);
+    letter-spacing: -0.01em;
+  }
+  .indicators-page p { color: var(--color-text-muted); margin-top: 0.5rem; max-width: 600px; }
+
+  .tier-section { margin-bottom: 2.5rem; }
+
+  .tier-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 1rem;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-subtle);
+  }
+
+  .tier-icon {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.75rem; font-weight: 700;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+  }
+
+  .tier-header h2 { font-family: var(--font-display); font-size: 1rem; font-weight: 700; }
+  .weight { font-size: 0.75rem; opacity: 0.6; margin-left: 0; display: block; margin-top: 0.1rem; }
+
+  .tier-1 .tier-icon { background: rgba(245, 158, 11, 0.15); color: var(--color-gold); }
+  .tier-1 { border-left: 3px solid var(--color-gold); }
+  .tier-1 h2 { color: var(--color-gold); }
+
+  .tier-2 .tier-icon { background: rgba(96, 165, 250, 0.15); color: var(--color-blue-steel); }
+  .tier-2 { border-left: 3px solid var(--color-blue-steel); }
+  .tier-2 h2 { color: var(--color-blue-steel); }
+
+  .tier-3 .tier-icon { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+  .tier-3 { border-left: 3px solid #a855f7; }
+  .tier-3 h2 { color: #c084fc; }
+
+  .tier-4 .tier-icon { background: rgba(16, 185, 129, 0.15); color: var(--color-emerald); }
+  .tier-4 { border-left: 3px solid var(--color-emerald); }
+  .tier-4 h2 { color: var(--color-emerald); }
+
+  .tier-5 .tier-icon { background: rgba(251, 146, 60, 0.15); color: #fb923c; }
+  .tier-5 { border-left: 3px solid #fb923c; }
+  .tier-5 h2 { color: #fb923c; }
+
+  .tier-6 .tier-icon { background: rgba(100, 116, 139, 0.15); color: var(--color-text-muted); }
+  .tier-6 { border-left: 3px solid var(--color-text-muted); }
+  .tier-6 h2 { color: var(--color-text-secondary); }
+
+  .indicator-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .indicator-card {
+    padding: 1.15rem;
+    transition: all var(--transition-fast);
+  }
+  .indicator-card:hover { transform: translateY(-2px); border-color: var(--color-border); }
+
+  .ind-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+  }
+  .ind-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--color-gold);
+    margin-bottom: 0.65rem;
+  }
+
+  .ind-bar {
+    height: 4px;
+    background: var(--color-bg-elevated);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.65rem;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--color-emerald) 0%, var(--color-gold) 50%, var(--color-crimson) 100%);
+    transition: width var(--transition-normal);
+  }
+
+  .ind-meta {
+    font-size: 0.68rem;
+    color: var(--color-text-muted);
+  }
+
+  /* ---- Tablet ---- */
+  @media (max-width: 1024px) {
+    .indicator-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 768px) {
+    .indicator-grid {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+    .tier-header {
+      padding: 0.75rem 1rem;
+    }
+    .tier-header h2 { font-size: 0.9rem; }
+    .indicators-page h1 { font-size: 1.5rem; }
+    .indicators-page p { font-size: 0.85rem; }
+    .indicators-page header { margin-bottom: 1.75rem; }
+    .tier-section { margin-bottom: 1.75rem; }
+  }
+
+  /* ---- Light Theme ---- */
+  [data-theme="light"] .tier-3 { border-left-color: var(--color-tier-3); }
+  [data-theme="light"] .tier-3 .tier-icon { background: rgba(124, 58, 237, 0.1); color: var(--color-tier-3-text); }
+  [data-theme="light"] .tier-3 h2 { color: var(--color-tier-3-text); }
+
+  [data-theme="light"] .tier-5 { border-left-color: var(--color-tier-5); }
+  [data-theme="light"] .tier-5 .tier-icon { background: rgba(234, 88, 12, 0.1); color: var(--color-tier-5-text); }
+  [data-theme="light"] .tier-5 h2 { color: var(--color-tier-5-text); }
+
+  [data-theme="light"] .tier-1 .tier-icon { background: rgba(245, 158, 11, 0.1); }
+  [data-theme="light"] .tier-2 .tier-icon { background: rgba(59, 130, 246, 0.1); }
+  [data-theme="light"] .tier-4 .tier-icon { background: rgba(16, 185, 129, 0.1); }
+  [data-theme="light"] .tier-6 .tier-icon { background: rgba(100, 116, 139, 0.1); }
+
+  [data-theme="light"] .bar-fill {
+    background: linear-gradient(90deg, var(--color-emerald) 0%, var(--color-gold) 50%, var(--color-crimson) 100%);
+    opacity: 0.75;
+  }
+
+  /* ---- Small ---- */
+  @media (max-width: 480px) {
+    .indicator-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    .indicator-card { padding: 0.85rem; }
+    .ind-value { font-size: 1.1rem; }
+    .ind-name { font-size: 0.7rem; margin-bottom: 0.35rem; }
+    .ind-meta { font-size: 0.6rem; }
+    .tier-header {
+      padding: 0.65rem 0.85rem;
+      gap: 0.65rem;
+    }
+    .tier-header h2 { font-size: 0.82rem; }
+    .weight { font-size: 0.65rem; }
+    .tier-icon { width: 24px; height: 24px; font-size: 0.65rem; }
+    .tier-section { margin-bottom: 1.5rem; }
+  }
+</style>

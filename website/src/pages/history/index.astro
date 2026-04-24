@@ -1,0 +1,278 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="NTI History — Historical Score Chart" description="Historical Nifty Timing Index scores over the past 30 days with Nifty 50 overlay">
+  <div class="history-page">
+    <header class="animate-fade-in-up">
+      <h1>NTI Score History</h1>
+      <p>30-day NTI score chart overlaid with Nifty 50 price</p>
+    </header>
+
+    <div class="chart-controls card animate-stagger-in stagger-1">
+      <div class="control-group">
+        <label>Period</label>
+        <div class="btn-group" id="period-btns">
+          <button class="btn active" data-period="7d">7D</button>
+          <button class="btn" data-period="30d">30D</button>
+          <button class="btn" data-period="90d">90D</button>
+          <button class="btn" data-period="1y">1Y</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <label>Overlay</label>
+        <div class="btn-group" id="overlay-btns">
+          <button class="btn active" data-overlay="nifty">Nifty 50</button>
+          <button class="btn" data-overlay="none">None</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-container card animate-stagger-in stagger-2">
+      <canvas id="history-chart"></canvas>
+    </div>
+
+    <div class="stats-grid animate-stagger-in stagger-3">
+      <div class="stat-card card">
+        <span class="stat-label">Current Score</span>
+        <span class="stat-value mono" id="current-score">—</span>
+      </div>
+      <div class="stat-card card">
+        <span class="stat-label">30D Average</span>
+        <span class="stat-value mono" id="avg-score">—</span>
+      </div>
+      <div class="stat-card card">
+        <span class="stat-label">30D High</span>
+        <span class="stat-value mono" id="high-score">—</span>
+      </div>
+      <div class="stat-card card">
+        <span class="stat-label">30D Low</span>
+        <span class="stat-value mono" id="low-score">—</span>
+      </div>
+      <div class="stat-card card">
+        <span class="stat-label">Zone Changes (30D)</span>
+        <span class="stat-value mono" id="zone-changes">—</span>
+      </div>
+      <div class="stat-card card">
+        <span class="stat-label">Most Common Zone</span>
+        <span class="stat-value mono" id="common-zone">—</span>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .history-page header { margin-bottom: 2.5rem; }
+  .history-page h1 {
+    font-family: var(--font-display);
+    font-size: 1.85rem; font-weight: 800; color: var(--color-gold);
+    letter-spacing: -0.01em;
+  }
+  .history-page p { color: var(--color-text-muted); margin-top: 0.5rem; }
+
+  .chart-controls {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .control-group label {
+    display: block;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .btn-group { display: flex; gap: 0.25rem; }
+
+  .chart-container {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    height: 400px;
+  }
+
+  .chart-container canvas { width: 100% !important; height: 100% !important; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 1rem 1.15rem;
+    text-align: center;
+  }
+
+  .stat-label {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--color-gold); }
+
+  /* ---- Light Theme ---- */
+  [data-theme="light"] .chart-container {
+    background: var(--color-bg-card);
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 768px) {
+    .chart-controls { flex-direction: column; gap: 1rem; padding: 1rem; }
+    .chart-container { height: 280px; padding: 1rem; }
+    .stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    .stat-card { padding: 0.85rem 1rem; }
+    .stat-value { font-size: 1.25rem; }
+    .history-page header { margin-bottom: 1.75rem; }
+  }
+
+  /* ---- Small ---- */
+  @media (max-width: 480px) {
+    .chart-container { height: 220px; padding: 0.75rem; }
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .stat-card { padding: 0.75rem; }
+    .stat-value { font-size: 1.1rem; }
+    .stat-label { font-size: 0.58rem; }
+    .chart-controls { padding: 0.85rem; }
+    .btn-group { flex-wrap: wrap; }
+  }
+</style>
+
+<script>
+  import { Chart, registerables } from "chart.js";
+  Chart.register(...registerables);
+
+  async function loadHistory() {
+    try {
+      const res = await fetch("/api/history.json");
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const labels = data.scores?.map((s: any) => {
+        const d = new Date(s.date);
+        return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      }) ?? [];
+
+      const scores = data.scores?.map((s: any) => s.nti_score_avg ?? s.score) ?? [];
+      const niftyPrices = data.scores?.map((s: any) => s.nifty_price) ?? [];
+
+      // Update stats
+      if (scores.length > 0) {
+        document.getElementById("current-score")!.textContent = scores[scores.length - 1].toFixed(1);
+        document.getElementById("avg-score")!.textContent = (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1);
+        document.getElementById("high-score")!.textContent = Math.max(...scores).toFixed(1);
+        document.getElementById("low-score")!.textContent = Math.min(...scores).toFixed(1);
+      }
+
+      /* Resolve CSS variables for theme-aware chart styling */
+      const style = getComputedStyle(document.documentElement);
+      const gold = style.getPropertyValue("--color-gold").trim() || "#f59e0b";
+      const blueSteel = style.getPropertyValue("--color-blue-steel").trim() || "#3b82f6";
+      const textMuted = style.getPropertyValue("--color-text-muted").trim() || "#556580";
+      const textSecondary = style.getPropertyValue("--color-text-secondary").trim() || "#8c9bb5";
+      const border = style.getPropertyValue("--color-border").trim() || "#1e3050";
+      const bgElevated = style.getPropertyValue("--color-bg-elevated").trim() || "#162038";
+      const textPrimary = style.getPropertyValue("--color-text-primary").trim() || "#eef2f7";
+      const fontMono = style.getPropertyValue("--font-mono").trim() || "'JetBrains Mono', monospace";
+      const fontBody = style.getPropertyValue("--font-body").trim() || "'DM Sans', sans-serif";
+
+      const ctx = (document.getElementById("history-chart") as HTMLCanvasElement).getContext("2d");
+      if (!ctx) return;
+
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "NTI Score",
+              data: scores,
+              borderColor: gold,
+              backgroundColor: `${gold}14`,
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3,
+              pointHoverRadius: 6,
+              pointBackgroundColor: gold,
+              pointBorderColor: "transparent",
+              yAxisID: "y",
+            },
+            {
+              label: "Nifty 50",
+              data: niftyPrices,
+              borderColor: blueSteel,
+              backgroundColor: "transparent",
+              borderDash: [5, 5],
+              tension: 0.3,
+              pointRadius: 2,
+              pointHoverRadius: 5,
+              pointBackgroundColor: blueSteel,
+              pointBorderColor: "transparent",
+              yAxisID: "y1",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: {
+              labels: {
+                color: textSecondary,
+                font: { family: fontBody, size: 11 },
+                usePointStyle: true,
+                pointStyle: "circle",
+              },
+            },
+            tooltip: {
+              backgroundColor: bgElevated,
+              borderColor: border,
+              borderWidth: 1,
+              titleColor: textPrimary,
+              bodyColor: textSecondary,
+              titleFont: { family: fontBody, weight: "600" },
+              bodyFont: { family: fontMono },
+              padding: 10,
+              cornerRadius: 8,
+            },
+          },
+          scales: {
+            x: {
+              ticks: { color: textMuted, maxTicksLimit: 10, font: { size: 10, family: fontBody } },
+              grid: { color: `${border}40` },
+            },
+            y: {
+              position: "left",
+              min: 0,
+              max: 100,
+              ticks: { color: gold, font: { family: fontMono, size: 10 } },
+              grid: { color: `${border}40` },
+              title: { display: true, text: "NTI Score", color: gold, font: { family: fontBody, size: 11 } },
+            },
+            y1: {
+              position: "right",
+              ticks: { color: blueSteel, font: { family: fontMono, size: 10 } },
+              grid: { drawOnChartArea: false },
+              title: { display: true, text: "Nifty 50", color: blueSteel, font: { family: fontBody, size: 11 } },
+            },
+          },
+        },
+      });
+    } catch (err) {
+      console.error("Failed to load history:", err);
+    }
+  }
+
+  loadHistory();
+</script>

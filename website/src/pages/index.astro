@@ -1,0 +1,374 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+// Fetch latest API data
+let latestData: any = null;
+try {
+  const res = await fetch(new URL("/api/latest.json", Astro.site));
+  if (res.ok) latestData = await res.json();
+} catch {}
+
+const score = latestData?.indices?.nifty_50?.score ?? 0;
+const zone = latestData?.indices?.nifty_50?.zone ?? "UNKNOWN";
+const confidence = latestData?.indices?.nifty_50?.confidence ?? 0;
+const indicators = latestData?.indicators ?? {};
+const topDrivers = latestData?.top_drivers ?? [];
+const topStocks = latestData?.top_stock_picks ?? [];
+const timestamp = latestData?.timestamp ?? "";
+
+function getZoneColor(z: string): string {
+  const m: Record<string,string> = {
+    EXTREME_BUY:"#00ff88", STRONG_BUY:"#22c55e", BUY_LEAN:"#4ade80",
+    NEUTRAL:"#60a5fa", SELL_LEAN:"#fb923c", STRONG_SELL:"#ef4444", EXTREME_SELL:"#dc2626"
+  };
+  return m[z] || "#64748b";
+}
+---
+
+<Layout title={`NTI Dashboard — Score ${score} | ${zone.replace(/_/g," ")}`} description="Live Nifty Timing Index dashboard with hourly market analysis">
+  <div class="dashboard">
+
+    <!-- Hero Section -->
+    <section class="hero-section animate-fade-in-up">
+      <div class="hero-grid">
+        <!-- Gauge Card -->
+        <div class="gauge-card card">
+          <div class="gauge-wrapper">
+            <svg viewBox="0 0 200 120" class="gauge-svg">
+              <defs>
+                <linearGradient id="gauge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="var(--color-extreme-buy)"/>
+                  <stop offset="25%" stop-color="var(--color-buy-lean)"/>
+                  <stop offset="50%" stop-color="var(--color-neutral)"/>
+                  <stop offset="75%" stop-color="var(--color-sell-lean)"/>
+                  <stop offset="100%" stop-color="var(--color-extreme-sell)"/>
+                </linearGradient>
+              </defs>
+              <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--color-bg-elevated)" stroke-width="12" stroke-linecap="round"/>
+              <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#gauge-grad)" stroke-width="12" stroke-linecap="round"
+                stroke-dasharray="251.3"
+                stroke-dashoffset={251.3 - (251.3 * score / 100)}
+                style={`filter: drop-shadow(0 0 8px ${getZoneColor(zone)}40); transition: stroke-dashoffset 0.8s ease`}/>
+            </svg>
+            <div class="gauge-center">
+              <span class="gauge-score mono" style={`color: ${getZoneColor(zone)}`}>{score}</span>
+              <span class="gauge-zone" style={`color: ${getZoneColor(zone)}`}>{zone.replace(/_/g," ")}</span>
+            </div>
+          </div>
+          <div class="gauge-meta">
+            <span class="gauge-confidence">
+              Confidence: <strong class="mono" style={`color: ${confidence >= 80 ? 'var(--color-emerald)' : confidence >= 60 ? 'var(--color-gold)' : 'var(--color-crimson)'}`}>{confidence}%</strong>
+            </span>
+            <span class="gauge-timestamp">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              {timestamp ? new Date(timestamp).toLocaleString("en-IN",{timeZone:"Asia/Kolkata",hour:"2-digit",minute:"2-digit"}) : "—"} IST
+            </span>
+          </div>
+        </div>
+
+        <!-- Index Scores -->
+        <div class="index-scores card animate-stagger-in stagger-1">
+          <h3 class="section-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            Index Scores
+          </h3>
+          <div class="index-list">
+            {Object.entries(latestData?.indices ?? {}).map(([name, data]: [string, any]) => (
+              <div class="index-row" style={`border-left-color: ${getZoneColor(data.zone)}`}>
+                <span class="index-name">{name.replace(/_/g," ").replace(/\b\w/g,l=>l.toUpperCase())}</span>
+                <span class="index-score mono" style={`color: ${getZoneColor(data.zone)}`}>{data.score ?? "—"}</span>
+                <span class="badge" style={`background: ${getZoneColor(data.zone)}12; color: ${getZoneColor(data.zone)}; border-color: ${getZoneColor(data.zone)}25`}>
+                  {(data.zone ?? "").replace(/_/g," ")}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Drivers -->
+    {topDrivers.length > 0 && (
+    <section class="drivers-section animate-stagger-in stagger-2">
+      <h2 class="section-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        Top SHAP Drivers
+      </h2>
+      <div class="drivers-grid">
+        {topDrivers.slice(0,5).map((d: any) => (
+          <div class="driver-chip card card-hover">
+            <span class="driver-direction" style={`color: ${d.direction==="sell"?"var(--color-crimson)":"var(--color-emerald)"}`}>
+              {d.direction === "sell" ? "▲ SELL" : "▼ BUY"}
+            </span>
+            <span class="driver-label">{d.label || d.indicator}</span>
+            <span class="driver-shap mono">SHAP: {typeof d.shap==="number"?d.shap.toFixed(3):"—"}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+    )}
+
+    <!-- Key Indicators -->
+    <section class="indicators-section animate-stagger-in stagger-3">
+      <h2 class="section-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M12 17V5"/><path d="M7 17v-3"/></svg>
+        Key Indicators
+      </h2>
+      <div class="indicators-strip">
+        {[
+          ["Nifty PE", indicators.nifty_pe, "x"],
+          ["Nifty PB", indicators.nifty_pb, "x"],
+          ["India VIX", indicators.india_vix, ""],
+          ["MMI", indicators.mmi, ""],
+          ["PCR", indicators.pcr, ""],
+          ["FII Net", indicators.fii_cash_net, "Cr"],
+          ["US 10Y", indicators.us_10y, "%"],
+          ["USD/INR", indicators.usd_inr, ""],
+          ["Brent", indicators.brent_crude, "/bbl"],
+          ["CPI", indicators.cpi, "%"],
+        ].map(([label, val, unit]: any) => (
+          <div class="indicator-chip">
+            <span class="ind-label">{label}</span>
+            <span class="ind-value mono">{val ?? "—"}</span>
+            {unit && <span class="ind-unit">{unit}</span>}
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Top Value Picks -->
+    {topStocks.length > 0 && (
+    <section class="picks-section animate-stagger-in stagger-4">
+      <h2 class="section-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 9 8 9 8"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 15 8 15 8"/><path d="M4 22h16"/><path d="M10 22V8"/><path d="M14 22V8"/><path d="M12 2v6"/></svg>
+        Top Value Picks
+        <span class="badge badge-gold">PE&lt;20 · PB&lt;3</span>
+      </h2>
+      <div class="picks-grid">
+        {topStocks.slice(0,8).map((s: any) => (
+          <a href={`/stocks/${s.symbol}`} class="pick-card card card-hover">
+            <div class="pick-header">
+              <span class="pick-symbol mono">{s.symbol}</span>
+              {s.is_psu && <span class="badge badge-gold">★ PSU</span>}
+            </div>
+            <div class="pick-metrics">
+              <div class="pick-metric">
+                <span class="pick-metric-label">PE</span>
+                <span class="pick-metric-value mono">{s.pe}</span>
+              </div>
+              <div class="pick-metric">
+                <span class="pick-metric-label">PB</span>
+                <span class="pick-metric-value mono">{s.pb}</span>
+              </div>
+              <div class="pick-metric">
+                <span class="pick-metric-label">Score</span>
+                <span class="pick-metric-value mono">{s.composite_score}</span>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+    )}
+
+    <!-- Latest Blogs -->
+    <section class="blogs-section animate-stagger-in stagger-5">
+      <h2 class="section-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+        Latest Updates
+      </h2>
+      <p class="section-hint">Hourly market analysis generated by AI</p>
+      <div class="blog-placeholder card">
+        <div class="blog-placeholder-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        </div>
+        <p>Blog posts will appear here after the first hourly pipeline run.</p>
+        <a href="/blog" class="view-all-link">View All Blogs →</a>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .dashboard { display:flex; flex-direction:column; gap:2.5rem; }
+
+  /* ---- Hero ---- */
+  .hero-grid { display:grid; grid-template-columns:1fr 1.2fr; gap:1.5rem; align-items: start; }
+
+  .gauge-card {
+    display:flex; flex-direction:column; align-items:center;
+    padding:2.5rem 2rem 1.5rem;
+  }
+  .gauge-wrapper { position:relative; width:220px; margin-bottom:1.25rem; }
+  .gauge-svg { width:100%; }
+  .gauge-center {
+    position:absolute; top:40%; left:50%;
+    transform:translate(-50%,-50%); text-align:center;
+  }
+  .gauge-score {
+    font-size:2.75rem; font-weight:800; display:block;
+    font-family: var(--font-mono);
+    letter-spacing: -0.02em;
+  }
+  .gauge-zone {
+    font-size:0.8rem; font-weight:700;
+    text-transform:capitalize; letter-spacing:0.08em;
+  }
+  .gauge-meta {
+    display:flex; justify-content:space-between; width:100%;
+    color:var(--color-text-muted); font-size:0.8rem;
+    gap: 1rem;
+  }
+  .gauge-confidence strong { font-size: 0.9rem; }
+  .gauge-timestamp {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+  }
+
+  /* ---- Index Scores ---- */
+  .section-label {
+    font-family: var(--font-display);
+    font-size:0.85rem; color:var(--color-gold);
+    margin-bottom:1rem; font-weight:700;
+    display: flex; align-items: center; gap: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .index-list { display:flex; flex-direction:column; gap:0.5rem; }
+  .index-row {
+    display:flex; align-items:center; gap:0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-left: 3px solid;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-sunken);
+    transition: background var(--transition-fast);
+  }
+  .index-row:hover { background: var(--color-bg-elevated); }
+  .index-name { flex:1; color:var(--color-text-secondary); font-size:0.85rem; font-weight: 500; }
+  .index-score { font-weight:700; font-size:1.1rem; }
+  .index-row .badge {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.45rem;
+  }
+
+  /* ---- Drivers ---- */
+  .drivers-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:0.75rem;
+  }
+  .driver-chip {
+    padding:1rem; display:flex; flex-direction:column; gap:0.3rem;
+  }
+  .driver-direction { font-size:0.72rem; font-weight:700; letter-spacing: 0.04em; }
+  .driver-label { font-size:0.9rem; font-weight:500; color: var(--color-text-primary); }
+  .driver-shap { font-size:0.72rem; color:var(--color-text-muted); }
+
+  /* ---- Indicators Strip ---- */
+  .indicators-strip {
+    display:flex; gap:0.6rem; overflow-x:auto; padding-bottom:0.75rem;
+    scrollbar-width: thin;
+  }
+  .indicator-chip {
+    flex-shrink:0;
+    background:var(--color-bg-card);
+    border:1px solid var(--color-border-subtle);
+    border-radius:var(--radius-md);
+    padding:0.7rem 1.1rem;
+    display:flex; flex-direction:column; align-items:center;
+    min-width: 90px;
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
+  }
+  .indicator-chip:hover {
+    border-color: var(--color-border);
+    transform: translateY(-1px);
+  }
+  .ind-label { font-size:0.68rem; color:var(--color-text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+  .ind-value { font-size:1.15rem; font-weight:700; color:var(--color-text-primary); margin: 0.15rem 0; }
+  .ind-unit { font-size:0.65rem; color:var(--color-text-muted); }
+
+  /* ---- Picks ---- */
+  .picks-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:0.75rem; }
+  .pick-card { text-decoration:none; color:inherit; padding:1.15rem; }
+  .pick-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; }
+  .pick-symbol { font-size:1.05rem; font-weight:700; color:var(--color-gold-bright); }
+  .pick-metrics { display:flex; gap:0; }
+  .pick-metric {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 0.4rem 0;
+  }
+  .pick-metric + .pick-metric { border-left: 1px solid var(--color-border-subtle); }
+  .pick-metric-label { font-size:0.65rem; color:var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .pick-metric-value { font-size:0.9rem; color:var(--color-text-primary); margin-top: 0.2rem; }
+
+  /* ---- Blog placeholder ---- */
+  .blog-placeholder {
+    text-align:center; padding:2.5rem; color:var(--color-text-muted);
+  }
+  .blog-placeholder-icon {
+    color: var(--color-text-muted);
+    opacity: 0.4;
+    margin-bottom: 0.75rem;
+  }
+  .view-all-link {
+    color:var(--color-gold); display:inline-block; margin-top:0.75rem;
+    font-weight:600; font-size: 0.9rem;
+    transition: all var(--transition-fast);
+  }
+  .view-all-link:hover { color: var(--color-gold-bright); transform: translateX(2px); }
+
+  /* ---- Light Theme ---- */
+  [data-theme="light"] .gauge-svg path[stroke="var(--color-bg-elevated)"] {
+    stroke: var(--color-border-subtle);
+  }
+
+  [data-theme="light"] .index-row {
+    background: var(--color-bg-sunken);
+  }
+  [data-theme="light"] .index-row:hover {
+    background: var(--color-bg-elevated);
+  }
+
+  [data-theme="light"] .indicator-chip {
+    background: var(--color-bg-sunken);
+  }
+
+  [data-theme="light"] .blog-placeholder {
+    background: var(--color-bg-sunken);
+  }
+
+  /* ---- Tablet ---- */
+  @media (max-width: 1024px) {
+    .hero-grid { gap: 1rem; }
+    .drivers-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 768px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .picks-grid { grid-template-columns: 1fr 1fr; }
+    .gauge-card { padding: 1.5rem 1rem 1rem; }
+    .gauge-wrapper { width: 180px; }
+    .gauge-score { font-size: 2.25rem; }
+    .gauge-meta { flex-direction: column; gap: 0.4rem; align-items: center; }
+    .drivers-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .indicators-strip { gap: 0.5rem; }
+    .indicator-chip { min-width: 80px; padding: 0.55rem 0.85rem; }
+    .ind-value { font-size: 1rem; }
+    .blog-placeholder { padding: 2rem 1.5rem; }
+    .index-row .badge { display: none; }
+  }
+
+  /* ---- Small ---- */
+  @media (max-width: 480px) {
+    .picks-grid { grid-template-columns: 1fr; }
+    .gauge-wrapper { width: 150px; }
+    .gauge-score { font-size: 1.85rem; }
+    .gauge-zone { font-size: 0.7rem; }
+    .indicators-strip { gap: 0.4rem; }
+    .indicator-chip { min-width: 72px; padding: 0.5rem 0.7rem; }
+    .ind-value { font-size: 0.9rem; }
+    .ind-label { font-size: 0.6rem; }
+    .drivers-grid { grid-template-columns: 1fr; }
+    .driver-chip { padding: 0.85rem; }
+    .pick-metric-value { font-size: 0.82rem; }
+    .pick-symbol { font-size: 0.95rem; }
+  }
+</style>

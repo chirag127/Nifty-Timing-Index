@@ -1,0 +1,76 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="NTI Stock Screener — Low PE/PB Value Picks" description="Top Indian value stocks with PE<20, PB<3, market cap ≥₹500Cr. PSU-preferred.">
+  <div class="screener-page">
+    <header class="animate-fade-in-up">
+      <h1>Stock Screener</h1>
+      <p>Value stocks: PE &lt; 20, PB &lt; 3, Market Cap ≥ ₹500 Cr · PSU-preferred</p>
+      <div class="screener-filters">
+        <span class="badge badge-gold">PE &lt; 20</span>
+        <span class="badge badge-gold">PB &lt; 3</span>
+        <span class="badge badge-gold">MCap ≥ ₹500Cr</span>
+        <span class="badge badge-emerald">PSU Boost</span>
+      </div>
+    </header>
+
+    <div class="screener-placeholder card animate-stagger-in stagger-1">
+      <div class="placeholder-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+      </div>
+      <h3>Screener data coming soon</h3>
+      <p>Data will appear after the first daily screener run (6 AM & 3:45 PM IST).</p>
+      <p class="hint">Stocks are filtered by strict PE &lt; 20 and PB &lt; 3 limits, ranked by composite score with PSU boost.</p>
+    </div>
+
+    <div id="screener-root"></div>
+  </div>
+</Layout>
+
+<style>
+  .screener-page header { margin-bottom: 2.5rem; }
+  .screener-page h1 {
+    font-family: var(--font-display);
+    font-size: 1.85rem; font-weight: 800; color: var(--color-gold);
+    letter-spacing: -0.01em;
+  }
+  .screener-page p { color: var(--color-text-muted); margin-top: 0.5rem; }
+
+  .screener-filters {
+    display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap;
+  }
+
+  .screener-placeholder {
+    text-align: center; padding: 4rem 2rem; color: var(--color-text-muted);
+  }
+  .placeholder-icon {
+    opacity: 0.3; margin-bottom: 1rem; color: var(--color-text-muted);
+  }
+  .screener-placeholder h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem; font-weight: 600;
+    color: var(--color-text-secondary); margin-bottom: 0.5rem;
+  }
+  .hint { font-size: 0.82rem; margin-top: 0.75rem; color: var(--color-text-muted); }
+
+  /* ---- Light Theme ---- */
+  [data-theme="light"] .screener-placeholder {
+    background: var(--color-bg-sunken);
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 768px) {
+    .screener-page header { margin-bottom: 1.75rem; }
+    .screener-placeholder { padding: 3rem 1.5rem; }
+    .screener-filters { gap: 0.35rem; }
+  }
+
+  /* ---- Small ---- */
+  @media (max-width: 480px) {
+    .screener-placeholder { padding: 2.5rem 1rem; }
+    .placeholder-icon svg { width: 28px; height: 28px; }
+    .screener-placeholder h3 { font-size: 1rem; }
+    .screener-filters { gap: 0.25rem; }
+  }
+</style>

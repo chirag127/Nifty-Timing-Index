@@ -1,0 +1,266 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  return [];
+}
+
+const { symbol } = Astro.params;
+---
+
+<Layout title={`Stock: ${symbol} — NTI Screener`} description={`Fundamental analysis and MTF risk for ${symbol}`}>
+  <div class="stock-page">
+    <header class="animate-fade-in-up">
+      <a href="/screener" class="back-link">← Back to Screener</a>
+      <h1 id="stock-symbol">{symbol}</h1>
+      <p id="stock-name">Loading stock data...</p>
+    </header>
+
+    <div class="stock-grid animate-stagger-in stagger-1">
+      <div class="fundamentals card">
+        <h2 class="section-title">Fundamentals</h2>
+        <table class="fund-table" id="fund-table">
+          <tbody>
+            <tr><td>P/E Ratio</td><td class="mono" id="val-pe">—</td></tr>
+            <tr><td>P/B Ratio</td><td class="mono" id="val-pb">—</td></tr>
+            <tr><td>Market Cap</td><td class="mono" id="val-mcap">—</td></tr>
+            <tr><td>ROE</td><td class="mono" id="val-roe">—</td></tr>
+            <tr><td>Debt/Equity</td><td class="mono" id="val-de">—</td></tr>
+            <tr><td>Dividend Yield</td><td class="mono" id="val-dy">—</td></tr>
+            <tr><td>Current Price</td><td class="mono" id="val-price">—</td></tr>
+            <tr><td>Analyst Buy %</td><td class="mono" id="val-analyst">—</td></tr>
+          </tbody>
+        </table>
+        <div id="psu-badge" class="psu-badge" style="display:none">★ PSU / Government</div>
+      </div>
+
+      <div class="scores card">
+        <h2 class="section-title">Composite Score</h2>
+        <div class="score-display" id="score-display">
+          <div class="big-score mono" id="big-score">—</div>
+          <div class="score-breakdown">
+            <div class="score-row">
+              <span>Value Score</span>
+              <div class="score-bar"><div class="score-fill" id="bar-value" style="width:0%"></div></div>
+              <span class="mono" id="val-value-score">—</span>
+            </div>
+            <div class="score-row">
+              <span>Quality Score</span>
+              <div class="score-bar"><div class="score-fill" id="bar-quality" style="width:0%"></div></div>
+              <span class="mono" id="val-quality-score">—</span>
+            </div>
+            <div class="score-row">
+              <span>Analyst Score</span>
+              <div class="score-bar"><div class="score-fill" id="bar-analyst" style="width:0%"></div></div>
+              <span class="mono" id="val-analyst-score">—</span>
+            </div>
+            <div class="score-row psu-row" id="psu-row" style="display:none">
+              <span>PSU Bonus</span>
+              <span class="mono" id="val-psu-boost">+10</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mtf-risk card">
+        <h2 class="section-title">
+          MTF Risk Calculator
+          <span class="badge badge-crimson">Info only</span>
+        </h2>
+        <div class="mtf-assumptions">
+          <span>Leverage: 3x</span>
+          <span>Interest: 12% p.a.</span>
+        </div>
+        <table class="mtf-table">
+          <tbody>
+            <tr><td>Margin Required</td><td class="mono" id="mtf-margin">33.3%</td></tr>
+            <tr><td>10% Fall → Capital Loss</td><td class="mono danger" id="mtf-10">30.0%</td></tr>
+            <tr><td>20% Fall → Capital Loss</td><td class="mono danger" id="mtf-20">60.0%</td></tr>
+            <tr><td>Margin Call Distance</td><td class="mono" id="mtf-mc">—</td></tr>
+            <tr><td>30-Day Break-even</td><td class="mono" id="mtf-be">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="warnings card" id="warnings-card" style="display:none">
+        <h2 class="section-title">Warnings</h2>
+        <ul id="warnings-list"></ul>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .stock-page header { margin-bottom: 2.5rem; }
+  .back-link { color: var(--color-text-muted); font-size: 0.85rem; }
+  .stock-page h1 {
+    font-family: var(--font-display);
+    font-size: 1.85rem; font-weight: 800; color: var(--color-gold);
+    margin-top: 0.5rem; letter-spacing: -0.01em;
+  }
+  .stock-page p { color: var(--color-text-muted); margin-top: 0.25rem; }
+
+  .stock-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .stock-grid .card .section-title {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .fund-table, .mtf-table { width: 100%; border-collapse: collapse; }
+  .fund-table td, .mtf-table td {
+    padding: 0.5rem 0;
+    font-size: 0.88rem;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+  .fund-table td:first-child, .mtf-table td:first-child {
+    color: var(--color-text-muted); font-size: 0.78rem;
+    font-weight: 500;
+  }
+  .fund-table td:last-child, .mtf-table td:last-child { text-align: right; }
+  .danger { color: var(--color-crimson) !important; }
+
+  .psu-badge {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.35rem 0.75rem;
+    background: var(--color-gold-glow);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: var(--radius-sm);
+    color: var(--color-gold);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .big-score {
+    font-size: 3.5rem;
+    font-weight: 800;
+    text-align: center;
+    color: var(--color-gold);
+    margin-bottom: 1.25rem;
+    line-height: 1;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+  }
+  .score-row span:first-child { width: 100px; flex-shrink: 0; }
+  .score-row .mono { width: 40px; text-align: right; }
+  .score-bar { flex: 1; height: 5px; background: var(--color-bg-elevated); border-radius: 3px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 3px; background: var(--color-gold); transition: width var(--transition-normal); }
+
+  .psu-row { color: var(--color-gold); }
+
+  .mtf-assumptions {
+    display: flex; gap: 1.5rem;
+    font-size: 0.78rem; color: var(--color-text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .warnings ul { list-style: none; padding: 0; }
+  .warnings li {
+    padding: 0.5rem 0;
+    font-size: 0.85rem;
+    color: var(--color-sell-lean);
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  /* ---- Light Theme ---- */
+  [data-theme="light"] .psu-badge {
+    border-color: rgba(245, 158, 11, 0.25);
+    background: rgba(245, 158, 11, 0.06);
+  }
+
+  [data-theme="light"] .score-fill {
+    opacity: 0.8;
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 768px) {
+    .stock-page header { margin-bottom: 1.75rem; }
+    .stock-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .big-score { font-size: 2.75rem; }
+    .mtf-assumptions { flex-direction: column; gap: 0.5rem; }
+    .score-row span:first-child { width: 80px; }
+  }
+
+  /* ---- Small ---- */
+  @media (max-width: 480px) {
+    .big-score { font-size: 2.25rem; }
+    .score-row span:first-child { width: 70px; font-size: 0.75rem; }
+    .score-row .mono { width: 35px; font-size: 0.78rem; }
+    .score-bar { height: 4px; }
+    .fund-table td, .mtf-table td { padding: 0.4rem 0; font-size: 0.82rem; }
+    .fund-table td:first-child, .mtf-table td:first-child { font-size: 0.72rem; }
+    .back-link { font-size: 0.8rem; }
+    .psu-badge { font-size: 0.72rem; padding: 0.25rem 0.6rem; }
+  }
+</style>
+
+<script define:vars={{ symbol }}>
+  async function loadStockData() {
+    try {
+      const res = await fetch("/api/screener/latest.json");
+      if (!res.ok) return;
+      const data = await res.json();
+      const stock = data.top_picks?.find(s => s.symbol === symbol);
+      if (!stock) return;
+
+      document.getElementById("stock-name").textContent = stock.name || stock.symbol;
+      document.getElementById("val-pe").textContent = stock.pe ?? "—";
+      document.getElementById("val-pb").textContent = stock.pb ?? "—";
+      document.getElementById("val-mcap").textContent = stock.market_cap_cr ? `₹${stock.market_cap_cr.toLocaleString("en-IN")} Cr` : "—";
+      document.getElementById("val-roe").textContent = stock.roe_pct ? `${stock.roe_pct}%` : "—";
+      document.getElementById("val-de").textContent = stock.debt_equity ?? "—";
+      document.getElementById("val-dy").textContent = stock.dividend_yield_pct ? `${stock.dividend_yield_pct}%` : "—";
+      document.getElementById("val-price").textContent = stock.current_price ? `₹${stock.current_price}` : "—";
+      document.getElementById("val-analyst").textContent = stock.analyst_buy_pct ? `${stock.analyst_buy_pct}%` : "—";
+
+      document.getElementById("big-score").textContent = stock.composite_score ?? "—";
+      document.getElementById("val-value-score").textContent = stock.value_score ?? "—";
+      document.getElementById("bar-value").style.width = `${stock.value_score ?? 0}%`;
+      document.getElementById("val-quality-score").textContent = stock.quality_score ?? "—";
+      document.getElementById("bar-quality").style.width = `${stock.quality_score ?? 0}%`;
+      document.getElementById("val-analyst-score").textContent = stock.analyst_score ?? "—";
+      document.getElementById("bar-analyst").style.width = `${stock.analyst_score ?? 0}%`;
+
+      if (stock.is_psu) {
+        document.getElementById("psu-badge").style.display = "inline-block";
+        document.getElementById("psu-row").style.display = "flex";
+        document.getElementById("val-psu-boost").textContent = `+${stock.psu_boost ?? 10}`;
+      }
+
+      if (stock.warnings?.length > 0) {
+        document.getElementById("warnings-card").style.display = "block";
+        const list = document.getElementById("warnings-list");
+        stock.warnings.forEach(w => {
+          const li = document.createElement("li");
+          li.textContent = w;
+          list.appendChild(li);
+        });
+      }
+
+      if (stock.current_price) {
+        const marginCallDist = (33.3 - 20) / 3 * 100 / stock.current_price;
+        const breakEven = (0.12 / 12 * 3 + 0.001 * 2) * 100;
+        document.getElementById("mtf-mc").textContent = `${marginCallDist.toFixed(1)}%`;
+        document.getElementById("mtf-be").textContent = `${breakEven.toFixed(2)}%`;
+      }
+    } catch (err) {
+      console.error("Failed to load stock data:", err);
+    }
+  }
+  loadStockData();
+</script>

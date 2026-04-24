@@ -1,0 +1,81 @@
+[project]
+name = "nifty-timing-index"
+version = "0.1.0"
+description = "Nifty Timing Index — Automated Indian market analysis with hourly blogs, multi-LLM fusion, and stock screener"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "MIT"}
+authors = [
+    {name = "Chirag Singhal", email = "whyiswhen@gmail.com"},
+]
+
+dependencies = [
+    # Core
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "python-dotenv>=1.0",
+    # LangGraph + LangChain for multi-model fusion
+    "langgraph>=0.4",
+    "langgraph-checkpoint>=2.0",
+    "langchain-openai>=0.3",
+    "langchain-core>=0.3",
+    # Native LLM SDKs (optional — falls back to OpenAI-compatible if not installed)
+    "langchain-cohere>=0.4",
+    "langchain-huggingface>=0.1",
+    # LLM Observability (Langfuse tracing for fusion workflows; requires langfuse>=2.45 for langfuse.langchain import)
+    "langfuse>=2.45",
+    # ML Model
+    "lightgbm>=4.5",
+    "xgboost>=2.1",
+    "scikit-learn>=1.6",
+    "shap>=0.46",
+    "joblib>=1.4",
+    # Scrapers
+    "yfinance>=0.2",
+    "nsetools>=1.0",
+    "requests>=2.32",
+    "beautifulsoup4>=4.12",
+    "feedparser>=6.0",
+    "selenium>=4.25",
+    "webdriver-manager>=4.0",
+    # Search APIs
+    "httpx>=0.28",
+    # Storage
+    "pyyaml>=6.0",
+    "jinja2>=3.1",
+    # Email
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "langchain>=1.2.15",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+    "mypy>=1.14",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nti"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "A", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true

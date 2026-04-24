@@ -1,0 +1,82 @@
+name: NTI Hourly Signal
+
+on:
+  schedule:
+    # Market hours (9 AM – 4 PM IST = 3:30–10:30 UTC): every hour
+    - cron: "30 3-10 * * 1-5"
+    # Extended hours (6 AM – 8 PM IST = 0:30–14:30 UTC): every hour
+    - cron: "30 0-14 * * 1-5"
+    # Overnight (8 PM – 6 AM IST, every 2 hours): limited runs
+    - cron: "30 15,17,19,21,23 * * *"
+    # Weekends (every 2 hours for global news)
+    - cron: "30 3,7,11,15,19,23 * * 0,6"
+  workflow_dispatch:
+
+jobs:
+  generate-signal:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Setup Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Install Chrome (for Selenium)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Download latest ML model artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nti-model
+          path: model_artifacts/
+        continue-on-error: true
+
+      - name: Run hourly pipeline
+        env:
+          LLM_GROQ_API_KEY: ${{ secrets.LLM_GROQ_API_KEY }}
+          LLM_GROQ_BASE_URL: ${{ secrets.LLM_GROQ_BASE_URL }}
+          LLM_GROQ_MODEL: ${{ secrets.LLM_GROQ_MODEL }}
+          LLM_GEMINI_API_KEY: ${{ secrets.LLM_GEMINI_API_KEY }}
+          LLM_GEMINI_BASE_URL: ${{ secrets.LLM_GEMINI_BASE_URL }}
+          LLM_GEMINI_MODEL: ${{ secrets.LLM_GEMINI_MODEL }}
+          LLM_CEREBRAS_API_KEY: ${{ secrets.LLM_CEREBRAS_API_KEY }}
+          LLM_CEREBRAS_BASE_URL: ${{ secrets.LLM_CEREBRAS_BASE_URL }}
+          LLM_CEREBRAS_MODEL: ${{ secrets.LLM_CEREBRAS_MODEL }}
+          LLM_OPENROUTER_API_KEY: ${{ secrets.LLM_OPENROUTER_API_KEY }}
+          LLM_OPENROUTER_BASE_URL: ${{ secrets.LLM_OPENROUTER_BASE_URL }}
+          LLM_OPENROUTER_MODEL: ${{ secrets.LLM_OPENROUTER_MODEL }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          EMAIL_GMAIL_ADDRESS: ${{ secrets.EMAIL_GMAIL_ADDRESS }}
+          EMAIL_GMAIL_APP_PASSWORD: ${{ secrets.EMAIL_GMAIL_APP_PASSWORD }}
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
+          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
+        run: uv run python -m nti.pipelines.hourly
+        continue-on-error: true
+
+      - name: Configure git
+        run: |
+          git config --local user.email "nti-bot@github.com"
+          git config --local user.name "NTI Bot"
+
+      - name: Commit and push data + blog
+        run: |
+          git add data/ website/src/content/blog/ README.md
+          git diff-index --quiet HEAD || git commit -m "NTI Update $(date -u '+%Y-%m-%d %H:%M') UTC"
+          git push

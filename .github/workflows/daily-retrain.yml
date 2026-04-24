@@ -1,0 +1,47 @@
+name: NTI Daily Model Retrain
+
+on:
+  schedule:
+    - cron: "30 20 * * *"  # 2:00 AM IST = 20:30 UTC previous day
+  workflow_dispatch:
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Setup Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run full retrain + backtest
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: uv run python -m nti.pipelines.daily_retrain
+
+      - name: Upload model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nti-model
+          path: model_artifacts/
+          retention-days: 7
+
+      - name: Push model metadata + backtest results
+        run: |
+          git config --local user.email "nti-bot@github.com"
+          git config --local user.name "NTI Bot"
+          git add data/model/ data/backtest/ data/api/backtest.json
+          git diff-index --quiet HEAD || git commit -m "Daily retrain $(date -u '+%Y-%m-%d')"
+          git push

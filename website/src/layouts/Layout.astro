@@ -1,0 +1,575 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "Nifty Timing Index", description = "Automated Indian market analysis with hourly blogs and stock screener" } = Astro.props;
+
+const navLinks = [
+  { href: "/", label: "Dashboard" },
+  { href: "/blog", label: "Blog" },
+  { href: "/screener", label: "Screener" },
+  { href: "/history", label: "History" },
+  { href: "/indicators", label: "Indicators" },
+  { href: "/backtest", label: "Backtest" },
+];
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <!-- Restore theme ASAP to prevent flash of wrong theme -->
+    <script is:inline>
+      (function(){
+        var t = localStorage.getItem('nti-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
+  </head>
+  <body>
+    <nav class="nav-bar">
+      <div class="nav-container">
+        <a href="/" class="nav-logo">
+          <svg class="logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="24" height="24" rx="6" fill="currentColor" fill-opacity="0.1" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M7 20L11 12L15 16L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="21" cy="8" r="2" fill="currentColor"/>
+          </svg>
+          <span class="logo-text">NTI</span>
+          <span class="logo-badge">LIVE</span>
+        </a>
+
+        <div class="nav-links" id="nav-links">
+          {navLinks.map((link) => (
+            <a href={link.href} class="nav-link">{link.label}</a>
+          ))}
+        </div>
+
+        <div class="nav-actions">
+          <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">
+            <span class="theme-icon-dark">☀️</span>
+            <span class="theme-icon-light">🌙</span>
+          </button>
+          <a href="/account" class="nav-account-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </a>
+          <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Open menu">
+            <span class="hamburger"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile menu overlay -->
+      <div class="mobile-menu" id="mobile-menu">
+        <div class="mobile-menu-inner">
+          {navLinks.map((link) => (
+            <a href={link.href} class="mobile-link">{link.label}</a>
+          ))}
+          <a href="/account" class="mobile-link mobile-link-accent">Account</a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-container">
+        <div class="footer-brand">
+          <span class="footer-logo">NTI</span>
+          <span class="footer-tagline">Precision market intelligence for Indian equities</span>
+        </div>
+        <div class="footer-disclaimer">
+          ⚠️ This is <strong>not investment advice</strong>. NTI is a personal market analysis tool.
+          Always do your own research before making investment decisions.
+        </div>
+        <div class="footer-meta">
+          <a href="https://github.com/chirag127/nifty-timing-index" target="_blank" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            GitHub
+          </a>
+          <span class="footer-sep">·</span>
+          <span>© 2025 Chirag Singhal</span>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Theme toggle
+      const toggle = document.getElementById("theme-toggle");
+      const root = document.documentElement;
+
+      toggle!.addEventListener("click", () => {
+        const current = root.getAttribute("data-theme");
+        const next = current === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        localStorage.setItem("nti-theme", next);
+      });
+
+      // Mobile menu
+      const menuBtn = document.getElementById("mobile-menu-btn");
+      const mobileMenu = document.getElementById("mobile-menu");
+      let menuOpen = false;
+
+      menuBtn!.addEventListener("click", () => {
+        menuOpen = !menuOpen;
+        mobileMenu!.classList.toggle("open", menuOpen);
+        menuBtn!.classList.toggle("active", menuOpen);
+        document.body.style.overflow = menuOpen ? "hidden" : "";
+      });
+
+      // Close mobile menu on link click
+      mobileMenu!.querySelectorAll("a").forEach((a) => {
+        a.addEventListener("click", () => {
+          menuOpen = false;
+          mobileMenu!.classList.remove("open");
+          menuBtn!.classList.remove("active");
+          document.body.style.overflow = "";
+        });
+      });
+    </script>
+
+    <style>
+      .nav-bar {
+        background: var(--color-bg-secondary);
+        border-bottom: 1px solid var(--color-border-subtle);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+      }
+
+      .nav-container {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 64px;
+      }
+
+      /* ---- Logo ---- */
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        text-decoration: none;
+        color: var(--color-text-primary);
+      }
+
+      .logo-mark {
+        width: 28px;
+        height: 28px;
+        color: var(--color-gold);
+      }
+
+      .logo-text {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 1.3rem;
+        color: var(--color-gold-bright);
+        letter-spacing: 0.02em;
+      }
+
+      .logo-badge {
+        font-family: var(--font-mono);
+        font-size: 0.55rem;
+        font-weight: 700;
+        color: var(--color-emerald);
+        background: rgba(16, 185, 129, 0.12);
+        padding: 0.1rem 0.4rem;
+        border-radius: var(--radius-full);
+        letter-spacing: 0.08em;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        animation: pulse-glow 3s ease-in-out infinite;
+      }
+
+      /* ---- Nav Links ---- */
+      .nav-links {
+        display: flex;
+        gap: 0.25rem;
+      }
+
+      .nav-link {
+        color: var(--color-text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-family: var(--font-body);
+        font-weight: 500;
+        padding: 0.4rem 0.75rem;
+        border-radius: var(--radius-sm);
+        transition: all var(--transition-fast);
+        position: relative;
+      }
+
+      .nav-link:hover {
+        color: var(--color-gold-bright);
+        background: var(--color-gold-glow);
+      }
+
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: var(--color-gold);
+        border-radius: 1px;
+        transition: all var(--transition-normal);
+        transform: translateX(-50%);
+      }
+
+      .nav-link:hover::after {
+        width: 60%;
+      }
+
+      /* ---- Nav Actions ---- */
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .theme-btn {
+        position: relative;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-bg-elevated);
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+        transition: all var(--transition-fast);
+      }
+
+      .theme-btn:hover {
+        border-color: var(--color-gold);
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.1);
+      }
+
+      .theme-icon-dark,
+      .theme-icon-light {
+        position: absolute;
+        transition: opacity var(--transition-fast), transform var(--transition-fast);
+      }
+
+      /* Show sun in dark mode, moon in light */
+      [data-theme="dark"] .theme-icon-dark { opacity: 1; transform: rotate(0deg); }
+      [data-theme="dark"] .theme-icon-light { opacity: 0; transform: rotate(90deg); }
+      [data-theme="light"] .theme-icon-dark { opacity: 0; transform: rotate(-90deg); }
+      [data-theme="light"] .theme-icon-light { opacity: 1; transform: rotate(0deg); }
+
+      .nav-account-link {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-text-muted);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border-subtle);
+        background: var(--color-bg-elevated);
+        transition: all var(--transition-fast);
+        text-decoration: none;
+      }
+
+      .nav-account-link:hover {
+        color: var(--color-gold);
+        border-color: var(--color-gold);
+      }
+
+      /* ---- Mobile Menu Button ---- */
+      .mobile-menu-btn {
+        display: none;
+        width: 36px;
+        height: 36px;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-bg-elevated);
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .hamburger,
+      .hamburger::before,
+      .hamburger::after {
+        display: block;
+        width: 16px;
+        height: 2px;
+        background: var(--color-text-secondary);
+        border-radius: 1px;
+        transition: all var(--transition-normal);
+      }
+
+      .hamburger {
+        position: relative;
+      }
+
+      .hamburger::before,
+      .hamburger::after {
+        content: "";
+        position: absolute;
+        left: 0;
+      }
+
+      .hamburger::before { top: -5px; }
+      .hamburger::after { top: 5px; }
+
+      .mobile-menu-btn.active .hamburger {
+        background: transparent;
+      }
+
+      .mobile-menu-btn.active .hamburger::before {
+        top: 0;
+        transform: rotate(45deg);
+        background: var(--color-gold);
+      }
+
+      .mobile-menu-btn.active .hamburger::after {
+        top: 0;
+        transform: rotate(-45deg);
+        background: var(--color-gold);
+      }
+
+      /* ---- Mobile Menu Overlay ---- */
+      .mobile-menu {
+        display: none;
+        position: fixed;
+        inset: 0;
+        top: 64px;
+        background: var(--color-bg-primary);
+        z-index: 90;
+        opacity: 0;
+        transform: translateY(-8px);
+        transition: opacity var(--transition-normal), transform var(--transition-normal);
+      }
+
+      .mobile-menu.open {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .mobile-menu-inner {
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .mobile-link {
+        display: block;
+        padding: 0.85rem 1rem;
+        color: var(--color-text-secondary);
+        text-decoration: none;
+        font-size: 1.05rem;
+        font-weight: 500;
+        border-radius: var(--radius-md);
+        transition: all var(--transition-fast);
+      }
+
+      .mobile-link:hover {
+        color: var(--color-gold-bright);
+        background: var(--color-gold-glow);
+      }
+
+      .mobile-link-accent {
+        color: var(--color-gold);
+        border: 1px solid var(--color-border-subtle);
+        margin-top: 0.5rem;
+      }
+
+      /* ---- Main Content ---- */
+      .main-content {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 2rem 2rem 3rem;
+        min-height: calc(100vh - 64px - 160px);
+        animation: fade-in-up 0.4s ease-out both;
+      }
+
+      /* ---- Footer ---- */
+      .site-footer {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-subtle);
+        padding: 2rem;
+        position: relative;
+      }
+
+      .site-footer::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 10%;
+        right: 10%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.15), transparent);
+      }
+
+      .footer-container {
+        max-width: 1440px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .footer-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .footer-logo {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--color-gold);
+      }
+
+      .footer-tagline {
+        font-size: 0.8rem;
+        color: var(--color-text-muted);
+      }
+
+      .footer-disclaimer {
+        color: var(--color-text-muted);
+        font-size: 0.78rem;
+        text-align: center;
+        max-width: 600px;
+        padding: 0.75rem 1rem;
+        background: var(--color-bg-card);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border-subtle);
+      }
+
+      .footer-disclaimer strong {
+        color: var(--color-gold);
+      }
+
+      .footer-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--color-text-muted);
+        font-size: 0.78rem;
+      }
+
+      .footer-meta a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        color: var(--color-text-muted);
+        text-decoration: none;
+        transition: color var(--transition-fast);
+      }
+
+      .footer-meta a:hover {
+        color: var(--color-gold);
+      }
+
+      .footer-sep {
+        color: var(--color-border);
+      }
+
+      /* ---- Responsive ---- */
+      @media (max-width: 768px) {
+        .nav-links {
+          display: none;
+        }
+
+        .mobile-menu-btn {
+          display: flex;
+        }
+
+        .mobile-menu {
+          display: block;
+        }
+
+        .nav-container {
+          padding: 0 1rem;
+        }
+
+        .main-content {
+          padding: 1.25rem 1rem 2rem;
+        }
+
+        .footer-tagline {
+          display: none;
+        }
+      }
+
+      /* ---- Small ---- */
+      @media (max-width: 480px) {
+        .nav-container {
+          padding: 0 0.75rem;
+        }
+
+        .main-content {
+          padding: 1rem 0.75rem 1.5rem;
+        }
+
+        .mobile-menu-inner {
+          padding: 1.5rem 1rem;
+        }
+
+        .mobile-link {
+          padding: 0.75rem 0.85rem;
+          font-size: 0.95rem;
+        }
+
+        .site-footer {
+          padding: 1.5rem 0.75rem;
+        }
+
+        .footer-disclaimer {
+          font-size: 0.72rem;
+          padding: 0.6rem 0.75rem;
+        }
+
+        .footer-meta {
+          font-size: 0.72rem;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+      }
+
+      /* ---- Light Theme ---- */
+      [data-theme="light"] .nav-bar {
+        background: rgba(237, 240, 247, 0.9);
+      }
+
+      [data-theme="light"] .theme-btn:hover {
+        box-shadow: 0 0 8px rgba(245, 158, 11, 0.08);
+      }
+
+      [data-theme="light"] .site-footer::before {
+        background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.08), transparent);
+      }
+
+      [data-theme="light"] .logo-badge {
+        background: rgba(16, 185, 129, 0.08);
+        border-color: rgba(16, 185, 129, 0.15);
+      }
+    </style>
+  </body>
+</html>

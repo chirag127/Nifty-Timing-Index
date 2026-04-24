@@ -1,0 +1,236 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+let backtestData: any = null;
+try {
+  const res = await fetch(new URL("/api/backtest.json", Astro.site));
+  if (res.ok) backtestData = await res.json();
+} catch {}
+---
+
+<Layout title="NTI Backtest — Strategy Performance" description="Historical backtest results for the NTI timing strategy vs buy-and-hold Nifty 50">
+  <div class="backtest-page">
+    <header class="animate-fade-in-up">
+      <h1>Backtest Results</h1>
+      <p>NTI timing strategy vs Buy &amp; Hold Nifty 50 — historical simulation</p>
+    </header>
+
+    {!backtestData ? (
+      <div class="empty-state card animate-stagger-in stagger-1">
+        <div class="empty-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+        </div>
+        <p>No backtest data yet. The first backtest will run after the daily retrain pipeline has enough historical data (typically 2+ weeks).</p>
+        <p class="hint">Backtests run daily at 2 AM IST alongside model retraining.</p>
+      </div>
+    ) : (
+      <>
+        <div class="backtest-meta card animate-stagger-in stagger-1">
+          <div class="meta-item">
+            <span class="meta-label">Backtest Period</span>
+            <span class="meta-value">{backtestData.start_date} → {backtestData.end_date}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Starting Capital</span>
+            <span class="meta-value mono">₹10,00,000</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Transaction Cost</span>
+            <span class="meta-value mono">0.1% per trade</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Model Version</span>
+            <span class="meta-value mono">{backtestData.model_version}</span>
+          </div>
+        </div>
+
+        <div class="metrics-grid animate-stagger-in stagger-2">
+          <div class="metric-card card highlight">
+            <span class="metric-label">CAGR</span>
+            <span class="metric-value mono" style={`color: ${backtestData.cagr_pct >= 0 ? 'var(--color-emerald)' : 'var(--color-crimson)'}`}>
+              {backtestData.cagr_pct?.toFixed(1)}%
+            </span>
+          </div>
+          <div class="metric-card card">
+            <span class="metric-label">Sharpe Ratio</span>
+            <span class="metric-value mono">{backtestData.sharpe_ratio?.toFixed(2)}</span>
+          </div>
+          <div class="metric-card card">
+            <span class="metric-label">Sortino Ratio</span>
+            <span class="metric-value mono">{backtestData.sortino_ratio?.toFixed(2)}</span>
+          </div>
+          <div class="metric-card card danger">
+            <span class="metric-label">Max Drawdown</span>
+            <span class="metric-value mono" style="color: var(--color-crimson)">
+              -{backtestData.max_drawdown_pct?.toFixed(1)}%
+            </span>
+          </div>
+          <div class="metric-card card">
+            <span class="metric-label">Calmar Ratio</span>
+            <span class="metric-value mono">{backtestData.calmar_ratio?.toFixed(2)}</span>
+          </div>
+          <div class="metric-card card">
+            <span class="metric-label">Win Rate</span>
+            <span class="metric-value mono">{backtestData.win_rate_pct?.toFixed(1)}%</span>
+          </div>
+          <div class="metric-card card">
+            <span class="metric-label">Total Trades</span>
+            <span class="metric-value mono">{backtestData.total_trades}</span>
+          </div>
+          <div class="metric-card card">
+            <span class="metric-label">Days in Market</span>
+            <span class="metric-value mono">{backtestData.days_in_market_pct?.toFixed(1)}%</span>
+          </div>
+          <div class="metric-card card highlight">
+            <span class="metric-label">Alpha vs Buy &amp; Hold</span>
+            <span class="metric-value mono" style={`color: ${backtestData.vs_buy_hold_alpha_pct >= 0 ? 'var(--color-emerald)' : 'var(--color-crimson)'}`}>
+              {backtestData.vs_buy_hold_alpha_pct >= 0 ? '+' : ''}{backtestData.vs_buy_hold_alpha_pct?.toFixed(1)}%
+            </span>
+          </div>
+        </div>
+
+        <div class="strategy-rules card animate-stagger-in stagger-3">
+          <h2 class="section-title">Strategy Rules</h2>
+          <table class="rules-table">
+            <thead>
+              <tr><th>NTI Zone</th><th>Score Range</th><th>Equity Allocation</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style="color: var(--color-extreme-buy)">EXTREME_BUY</td><td class="mono">0–15</td><td>100% Equity</td></tr>
+              <tr><td style="color: var(--color-strong-buy)">STRONG_BUY</td><td class="mono">16–30</td><td>100% Equity</td></tr>
+              <tr><td style="color: var(--color-buy-lean)">BUY_LEAN</td><td class="mono">31–45</td><td>100% Equity</td></tr>
+              <tr><td style="color: var(--color-neutral)">NEUTRAL</td><td class="mono">46–55</td><td>50% Equity / 50% Cash</td></tr>
+              <tr><td style="color: var(--color-sell-lean)">SELL_LEAN</td><td class="mono">56–69</td><td>0% Equity (All Cash)</td></tr>
+              <tr><td style="color: var(--color-strong-sell)">STRONG_SELL</td><td class="mono">70–84</td><td>0% Equity (All Cash)</td></tr>
+              <tr><td style="color: var(--color-extreme-sell)">EXTREME_SELL</td><td class="mono">85–100</td><td>0% Equity (All Cash)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="disclaimer card animate-stagger-in stagger-4">
+          <strong>⚠️ Disclaimer:</strong> Past performance does not guarantee future results.
+          This backtest uses historical data with simulated transaction costs.
+          Actual results may differ significantly. This is not investment advice.
+        </div>
+      </>
+    )}
+  </div>
+</Layout>
+
+<style>
+  .backtest-page header { margin-bottom: 2.5rem; }
+  .backtest-page h1 {
+    font-family: var(--font-display);
+    font-size: 1.85rem; font-weight: 800; color: var(--color-gold);
+    letter-spacing: -0.01em;
+  }
+  .backtest-page p { color: var(--color-text-muted); margin-top: 0.5rem; }
+
+  .empty-state {
+    text-align: center; padding: 4rem 2rem; color: var(--color-text-muted);
+  }
+  .empty-icon { opacity: 0.3; margin-bottom: 1rem; }
+  .hint { font-size: 0.82rem; margin-top: 0.75rem; }
+
+  .backtest-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .meta-item { text-align: center; }
+  .meta-label {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+  }
+  .meta-value { font-size: 0.95rem; color: var(--color-text-primary); }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .metric-card {
+    padding: 1.25rem;
+    text-align: center;
+    transition: all var(--transition-normal);
+  }
+  .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-elevated); }
+  .metric-card.highlight { border: 1px solid rgba(245, 158, 11, 0.2); }
+  .metric-card.danger { border-left: 3px solid var(--color-crimson); }
+
+  .metric-label {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .metric-value { font-size: 1.75rem; font-weight: 700; color: var(--color-gold); }
+
+  .strategy-rules {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .rules-table td {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.88rem;
+  }
+
+  .disclaimer {
+    padding: 1rem 1.25rem;
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    border-left: 3px solid var(--color-crimson);
+  }
+
+  /* ---- Light Theme ---- */
+  [data-theme="light"] .metric-card.highlight {
+    border-color: rgba(245, 158, 11, 0.25);
+  }
+
+  [data-theme="light"] .metric-card.danger {
+    border-left-color: var(--color-crimson);
+  }
+
+  [data-theme="light"] .disclaimer {
+    background: var(--color-bg-sunken);
+    border-left-color: var(--color-crimson);
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 768px) {
+    .backtest-page header { margin-bottom: 1.75rem; }
+    .backtest-meta { grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 1rem; }
+    .metrics-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+    .metric-card { padding: 1rem; }
+    .metric-value { font-size: 1.5rem; }
+    .strategy-rules { padding: 1.15rem; }
+    .empty-state { padding: 3rem 1.5rem; }
+  }
+
+  /* ---- Small ---- */
+  @media (max-width: 480px) {
+    .backtest-meta { grid-template-columns: 1fr; gap: 0.5rem; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .metric-card { padding: 0.85rem; }
+    .metric-value { font-size: 1.25rem; }
+    .metric-label { font-size: 0.58rem; }
+    .strategy-rules { padding: 1rem; }
+    .rules-table td { padding: 0.4rem 0.5rem; font-size: 0.8rem; }
+    .disclaimer { padding: 0.85rem 1rem; font-size: 0.78rem; }
+    .empty-state { padding: 2.5rem 1rem; }
+    .empty-icon svg { width: 28px; height: 28px; }
+  }
+</style>
