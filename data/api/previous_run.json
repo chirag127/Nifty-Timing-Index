@@ -59,9 +59,9 @@
   "llm_policy_flag": "none",
   "llm_geopolitical_score": 50,
   "nti_score": 69.1,
-  "nti_score_prev": 69.0,
+  "nti_score_prev": 69.1,
   "zone": "NEUTRAL",
-  "zone_prev": "SELL_LEAN",
+  "zone_prev": "NEUTRAL",
   "confidence": 50.0,
   "is_fallback": true,
   "model_version": "rule-based"
