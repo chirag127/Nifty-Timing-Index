@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-05-07T12:59:10.625705+05:30",
+  "timestamp": "2026-05-07T14:46:48.199275+05:30",
   "market_status": "open",
   "primary_index": "nifty_50",
   "indices": {
     "nifty_50": {
-      "score": 72.1,
-      "score_prev": 71.9,
+      "score": 72.0,
+      "score_prev": 72.1,
       "zone": "STRONG_SELL",
       "zone_prev": "STRONG_SELL",
       "zone_changed": false,
       "confidence": 50.0,
-      "price": 24402.0,
+      "price": 24360.05,
       "change_pct": 0.0
     }
   },
@@ -18,13 +18,13 @@
     "nifty_pe": 21.21,
     "nifty_pb": 3.33,
     "nifty_dy": 1.28,
-    "mmi": 64.38907885471559,
-    "india_vix": 16.74,
+    "mmi": 64.25814158997068,
+    "india_vix": 16.82,
     "pcr": null,
     "fii_cash_net": null,
     "us_10y": 4.43,
-    "usd_inr": 94.4124984741211,
-    "brent_crude": 98.33999633789062,
+    "usd_inr": 94.18399810791016,
+    "brent_crude": 99.06999969482422,
     "llm_news_danger": 50,
     "cpi": 4.2,
     "rbi_repo_rate": 6.5,
@@ -35,7 +35,7 @@
   },
   "top_drivers": [],
   "top_stock_picks": [],
-  "latest_blog_slug": "2026-05-07-12-59",
+  "latest_blog_slug": "2026-05-07-14-46",
   "model_version": "rule-based",
   "model_confidence": 50.0,
   "is_fallback": true
