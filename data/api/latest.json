@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-05-22T04:22:35.432871+05:30",
-  "market_status": "closed",
+  "timestamp": "2026-05-22T07:02:34.727585+05:30",
+  "market_status": "pre_market",
   "primary_index": "nifty_50",
   "indices": {
     "nifty_50": {
@@ -24,7 +24,7 @@
     "fii_cash_net": null,
     "us_10y": 4.57,
     "usd_inr": 96.19000244140625,
-    "brent_crude": 104.52999877929688,
+    "brent_crude": 105.0999984741211,
     "llm_news_danger": 50,
     "cpi": 4.2,
     "rbi_repo_rate": 6.5,
@@ -35,7 +35,7 @@
   },
   "top_drivers": [],
   "top_stock_picks": [],
-  "latest_blog_slug": "2026-05-22-04-22",
+  "latest_blog_slug": "2026-05-22-07-02",
   "model_version": "rule-based",
   "model_confidence": 50.0,
   "is_fallback": true
