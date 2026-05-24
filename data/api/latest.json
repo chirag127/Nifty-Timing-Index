@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-24T03:48:15.953881+05:30",
+  "timestamp": "2026-05-24T07:02:48.498439+05:30",
   "market_status": "closed",
   "primary_index": "nifty_50",
   "indices": {
@@ -35,7 +35,7 @@
   },
   "top_drivers": [],
   "top_stock_picks": [],
-  "latest_blog_slug": "2026-05-24-03-48",
+  "latest_blog_slug": "2026-05-24-07-02",
   "model_version": "rule-based",
   "model_confidence": 50.0,
   "is_fallback": true
