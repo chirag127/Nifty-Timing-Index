@@ -59,7 +59,7 @@
   "llm_policy_flag": "none",
   "llm_geopolitical_score": 50,
   "nti_score": 71.4,
-  "nti_score_prev": 71.1,
+  "nti_score_prev": 71.4,
   "zone": "STRONG_SELL",
   "zone_prev": "STRONG_SELL",
   "confidence": 50.0,
