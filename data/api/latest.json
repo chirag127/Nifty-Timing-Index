@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-25T17:39:38.427449+05:30",
+  "timestamp": "2026-05-25T18:23:02.129162+05:30",
   "market_status": "closed",
   "primary_index": "nifty_50",
   "indices": {
     "nifty_50": {
       "score": 71.1,
-      "score_prev": 71.0,
+      "score_prev": 71.1,
       "zone": "STRONG_SELL",
       "zone_prev": "STRONG_SELL",
       "zone_changed": false,
@@ -35,7 +35,7 @@
   },
   "top_drivers": [],
   "top_stock_picks": [],
-  "latest_blog_slug": "2026-05-25-17-39",
+  "latest_blog_slug": "2026-05-25-18-23",
   "model_version": "rule-based",
   "model_confidence": 50.0,
   "is_fallback": true
